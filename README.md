@@ -83,3 +83,4 @@ This project uses **Vite** instead of Laravel Mix for faster builds and better d
 - Hot module replacement during development
 - Optimized production builds
 # english-to-hindi-dictionary
+# english-to-hindi-dictionary
