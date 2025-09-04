@@ -47,6 +47,9 @@ Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('g
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'home')->name('home');
     Route::get('/contact-us', 'contact')->name('contact-us');
+    Route::get('/detail', 'worddetail')->name('worddetail');
+    Route::get('/login1', 'login')->name('login1');
+    // Route::post('/login', 'loginPost')->name('login');
     Route::get('/categorylist', 'categorylist')->name('categorieslist');
 
     // Blog
@@ -57,10 +60,11 @@ Route::controller(FrontendController::class)->group(function () {
     // Static pages
     // Route::get('/404', 'error')->name('404');
     Route::get('/privacy-policy', 'privacy')->name('privacy-policy');
+    Route::get('/faqs', 'faqs')->name('faqs');
     Route::get('/terms-and-conditions', 'termsconditions')->name('terms-and-conditions');
     Route::get('/about-us', 'about')->name('about-us');
     Route::get('/disclaimer', 'disclaimer')->name('disclaimer');
-    Route::get('/contact-us', 'contact')->name('contact');
+    // Route::get('/contact-us', 'contact')->name('contact');
 });
 
 
@@ -69,8 +73,8 @@ Route::controller(FrontendController::class)->group(function () {
 /// Public routes
 Route::controller(SiteController::class)->group(function () {
   // Main page
-  Route::get('/', 'index')
-    ->name('home');
+//   Route::get('/', 'index')
+//     ->name('home');
 });
 Route::post('/contact', [ContactController::class, 'send']);
 /// Protected routes
