@@ -136,7 +136,7 @@
         </section>
 
         <!-- New Features Section -->
-        <section class="my-16">
+        {{-- <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Enhanced Learning Tools</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -286,10 +286,10 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> --}}
 
         <!-- Word Categories -->
-        <section class="my-16">
+        {{-- <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-8 section-title">Word Categories</h2>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -363,7 +363,7 @@
                     Explore All Categories <i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
-        </section>
+        </section> --}}
 
         <!-- Browse Names by Alphabet -->
         <section class="my-16">
@@ -573,7 +573,7 @@
         </section>
 
         <!-- Learning Progress Section -->
-        <section class="my-16">
+        {{-- <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-8 section-title">Your Learning Progress</h2>
 
             <div class="glassmorphism p-6 rounded-2xl max-w-2xl mx-auto shadow-md">
@@ -632,7 +632,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> --}}
 
         <!-- Why Choose Us -->
         <section class="my-16">
@@ -696,7 +696,7 @@
         </section>
 
         <!-- Testimonials -->
-        <section class="my-16">
+        {{-- <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-8 section-title">What Our Users Say</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -754,6 +754,6 @@
                     <p class="light-text">"The interface is beautiful and easy to use. Being able to save words and track my progress has made my language learning journey much more effective."</p>
                 </div>
             </div>
-        </section>
+        </section> --}}
     </main>
 @include('frontend.partials.footer')
