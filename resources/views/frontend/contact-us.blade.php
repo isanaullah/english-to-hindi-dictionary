@@ -17,18 +17,12 @@
                 <!-- Contact Form -->
                 <div class="glassmorphism p-8 rounded-2xl shadow-md">
                     <h2 class="text-2xl font-bold dark-text mb-6">Send us a Message</h2>
-                    <form class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <form class="space-y-6" method="Post" action="{{url('contact')}}">
                             <div>
-                                <label class="block text-sm font-medium dark-text mb-2">First Name</label>
-                                <input type="text" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300" placeholder="Your first name">
+                                <label class="block text-sm font-medium dark-text mb-2">Name</label>
+                                <input type="text" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300" placeholder="Your Name">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium dark-text mb-2">Last Name</label>
-                                <input type="text" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300" placeholder="Your last name">
-                            </div>
-                        </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium dark-text mb-2">Email Address</label>
                             <input type="email" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300" placeholder="your.email@example.com">
@@ -66,7 +60,7 @@
                             </div>
                             <div>
                                 <h3 class="font-semibold dark-text">Email Us</h3>
-                                <p class="light-text">support@hindilingo.com</p>
+                                <p class="light-text">{{$setting->site_email}}</p>
                             </div>
                         </div>
                         <p class="light-text text-sm">We typically respond within 24 hours</p>
@@ -79,7 +73,7 @@
                             </div>
                             <div>
                                 <h3 class="font-semibold dark-text">Call Us</h3>
-                                <p class="light-text">+1 (555) 123-4567</p>
+                                <p class="light-text">{{$setting->site_phone}}</p>
                             </div>
                         </div>
                         <p class="light-text text-sm">Monday - Friday, 9 AM - 6 PM EST</p>
@@ -92,7 +86,7 @@
                             </div>
                             <div>
                                 <h3 class="font-semibold dark-text">Visit Us</h3>
-                                <p class="light-text">123 Language Street<br>Learning City, LC 12345</p>
+                                <p class="light-text">{{$setting->site_address}}</p>
                             </div>
                         </div>
                         <p class="light-text text-sm">By appointment only</p>
@@ -101,17 +95,14 @@
                     <div class="glassmorphism p-6 rounded-2xl shadow-md">
                         <h3 class="font-semibold dark-text mb-4">Follow Us</h3>
                         <div class="flex space-x-4">
-                            <a href="#" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
+                            <a href="{{$setting->site_fb}}" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
                                 <i class="fab fa-facebook-f text-primary-600"></i>
                             </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
+                            <a href="{{$setting->site_twitter}}" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
                                 <i class="fab fa-twitter text-primary-600"></i>
                             </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
+                            <a href="{{$setting->site_instagram}}" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
                                 <i class="fab fa-instagram text-primary-600"></i>
-                            </a>
-                            <a href="#" class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center hover:bg-primary-200 transition-all duration-200">
-                                <i class="fab fa-linkedin-in text-primary-600"></i>
                             </a>
                         </div>
                     </div>
@@ -122,47 +113,19 @@
         <!-- FAQ Section -->
         <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Frequently Asked Questions</h2>
-            
+
             <div class="max-w-3xl mx-auto space-y-4">
+                @foreach ($faq as $bc)
                 <div class="glassmorphism p-6 rounded-2xl shadow-md">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleFAQ(this)">
-                        <h3 class="font-semibold dark-text">How accurate are the translations?</h3>
+                        <h3 class="font-semibold dark-text">{{$bc->question}}</h3>
                         <i class="fas fa-chevron-down text-primary-600 transition-transform duration-300"></i>
                     </div>
                     <div class="faq-content hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text">Our translations are reviewed by native speakers and linguistic experts. We maintain over 95% accuracy across our database of 200,000+ words.</p>
+                        <p class="light-text">{{$bc->answer}}</p>
                     </div>
                 </div>
-
-                <div class="glassmorphism p-6 rounded-2xl shadow-md">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleFAQ(this)">
-                        <h3 class="font-semibold dark-text">Is HindiLingo free to use?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transition-transform duration-300"></i>
-                    </div>
-                    <div class="faq-content hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text">Yes! HindiLingo offers a comprehensive free tier with access to our dictionary, word of the day, and basic features. Premium features are available for advanced learners.</p>
-                    </div>
-                </div>
-
-                <div class="glassmorphism p-6 rounded-2xl shadow-md">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleFAQ(this)">
-                        <h3 class="font-semibold dark-text">Do you have a mobile app?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transition-transform duration-300"></i>
-                    </div>
-                    <div class="faq-content hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text">Yes! Our mobile apps are available on both iOS and Android. Download them from the App Store or Google Play Store.</p>
-                    </div>
-                </div>
-
-                <div class="glassmorphism p-6 rounded-2xl shadow-md">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleFAQ(this)">
-                        <h3 class="font-semibold dark-text">Can I suggest new words or corrections?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transition-transform duration-300"></i>
-                    </div>
-                    <div class="faq-content hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text">Absolutely! We welcome community contributions. Use the contact form above or email us directly with your suggestions.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </section>
 
@@ -196,7 +159,7 @@
         function toggleFAQ(element) {
             const content = element.nextElementSibling;
             const icon = element.querySelector('i');
-            
+
             content.classList.toggle('hidden');
             icon.classList.toggle('rotate-180');
         }

@@ -16,8 +16,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h2 class="text-3xl font-bold dark-text mb-6 section-title">Our Mission</h2>
-                    <p class="light-text mb-6 text-lg">At HindiLingo, we believe that language learning should be intuitive, engaging, and accessible to everyone. Our mission is to provide the most comprehensive and user-friendly English to Hindi dictionary experience.</p>
-                    <p class="light-text mb-6">We combine traditional dictionary features with modern technology to create an immersive learning environment that helps users not just translate words, but truly understand and use them in context.</p>
+                    <p class="light-text mb-6 text-lg">{!!$page->page_desc!!}</p>
                     <div class="flex flex-wrap gap-4">
                         <div class="px-4 py-2 glassmorphism rounded-full dark-text flex items-center shadow-sm">
                             <i class="fas fa-heart mr-2 text-accent-500"></i>
@@ -48,7 +47,7 @@
         <!-- Features Section -->
         <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">What Makes Us Different</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="glassmorphism p-6 rounded-2xl text-center group hover:bg-primary-50 transition-all duration-300 shadow-md">
                     <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-5 group-hover:animate-float">
@@ -79,7 +78,7 @@
         <!-- Team Section -->
         <section class="my-16">
             <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Meet Our Team</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="glassmorphism p-6 rounded-2xl text-center shadow-md">
                     <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -114,7 +113,7 @@
         <section class="my-16">
             <div class="glassmorphism p-8 rounded-2xl shadow-md">
                 <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Our Impact</h2>
-                
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                     <div class="text-center">
                         <div class="text-3xl font-bold text-primary-600 mb-2">500K+</div>

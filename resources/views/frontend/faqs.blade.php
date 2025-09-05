@@ -21,7 +21,7 @@
         </section>
 
         <!-- Search FAQs -->
-        <section class="mb-12">
+        {{-- <section class="mb-12">
             <div class="max-w-2xl mx-auto">
                 <div class="glassmorphism p-6 rounded-2xl shadow-md">
                     <div class="relative">
@@ -30,10 +30,10 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> --}}
 
         <!-- FAQ Categories -->
-        <section class="mb-12">
+        {{-- <section class="mb-12">
             <div class="flex flex-wrap justify-center gap-4 mb-8">
                 <button class="faq-category-btn active bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-all duration-300" data-category="all">
                     All Questions
@@ -51,135 +51,24 @@
                     Technical
                 </button>
             </div>
-        </section>
+        </section> --}}
 
         <!-- FAQ Items -->
         <section class="mb-16">
             <div class="max-w-4xl mx-auto space-y-6">
-                
+
                 <!-- General FAQs -->
+                @foreach ($faqs as $bc)
                 <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="general">
                     <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">What is HindiLingo and how does it work?</h3>
+                        <h3 class="text-lg font-semibold dark-text">{{$bc->question}}</h3>
                         <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
                     </button>
                     <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">HindiLingo is a comprehensive English-to-Hindi dictionary and learning platform designed to help you master Hindi vocabulary, pronunciation, and grammar. Our platform offers word translations, audio pronunciations, example sentences, and interactive learning tools to make your Hindi learning journey effective and enjoyable.</p>
+                        <p class="light-text leading-relaxed">{{$bc->answer}}</p>
                     </div>
                 </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="general">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">Is HindiLingo free to use?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Yes! HindiLingo offers a comprehensive free tier that includes basic dictionary lookups, word meanings, and pronunciation guides. We also offer premium features for advanced learners who want access to detailed grammar explanations, personalized learning paths, and offline access.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="general">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">Do I need to create an account to use the dictionary?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">No account is required for basic dictionary searches. However, creating a free account allows you to save favorite words, track your learning progress, access personalized recommendations, and sync your data across devices.</p>
-                    </div>
-                </div>
-
-                <!-- Dictionary FAQs -->
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="dictionary">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">How accurate are the translations?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Our translations are curated by native Hindi speakers and language experts. We provide multiple meanings for words with different contexts, along with example sentences to help you understand proper usage. Our database is continuously updated to ensure accuracy and relevance.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="dictionary">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">Can I search for Hindi words to get English meanings?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Yes! Our dictionary works both ways. You can search for English words to get Hindi translations, or search for Hindi words (in Devanagari script or Roman transliteration) to get English meanings and explanations.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="dictionary">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">How many words are in your dictionary?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Our dictionary contains over 50,000 English words with their Hindi translations, including common words, technical terms, idioms, and phrases. We regularly add new words and update existing entries based on user feedback and language evolution.</p>
-                    </div>
-                </div>
-
-                <!-- Learning FAQs -->
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="learning">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">How can I improve my Hindi pronunciation?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Each word in our dictionary includes audio pronunciation by native speakers. We also provide phonetic transcriptions and pronunciation guides. Practice regularly with our audio features, and consider using our pronunciation exercises and speaking practice tools.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="learning">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">What learning resources do you provide besides the dictionary?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">We offer grammar guides, daily vocabulary lessons, interactive quizzes, flashcards, phrase collections, cultural insights through our blog, and personalized learning paths. Our "Word of the Day" feature helps you learn new vocabulary consistently.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="learning">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">How long does it take to learn Hindi using your platform?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Learning time varies based on your dedication, prior language experience, and learning goals. With consistent daily practice (15-30 minutes), most users can build a basic vocabulary and start having simple conversations within 3-6 months. Our platform adapts to your pace and provides progress tracking to keep you motivated.</p>
-                    </div>
-                </div>
-
-                <!-- Technical FAQs -->
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="technical">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">Is there a mobile app available?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Currently, HindiLingo is available as a responsive web application that works perfectly on mobile devices. We're developing dedicated iOS and Android apps that will be available soon with additional offline features and enhanced mobile experience.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="technical">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">Can I use HindiLingo offline?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">Basic offline functionality is available for premium users, allowing you to access previously searched words and downloaded content. Full offline access will be available with our upcoming mobile apps, including the complete dictionary and learning materials.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item glassmorphism p-6 rounded-2xl shadow-md" data-category="technical">
-                    <button class="faq-question w-full text-left flex items-center justify-between py-2">
-                        <h3 class="text-lg font-semibold dark-text">How do I type in Hindi on my device?</h3>
-                        <i class="fas fa-chevron-down text-primary-600 transform transition-transform duration-200"></i>
-                    </button>
-                    <div class="faq-answer hidden mt-4 pt-4 border-t border-slate-200">
-                        <p class="light-text leading-relaxed">You can enable Hindi keyboard on your device through system settings. We also provide an on-screen Hindi keyboard and support Roman transliteration (typing Hindi words using English letters). Our help section includes detailed guides for setting up Hindi input on different devices.</p>
-                    </div>
-                </div>
+                @endforeach
 
             </div>
         </section>
@@ -206,10 +95,10 @@
         </section>
 
         <!-- Popular Resources -->
-        <section class="mb-16">
+        {{-- <section class="mb-16">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Popular Resources</h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="glassmorphism p-6 rounded-2xl shadow-md text-center word-card">
                         <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -245,7 +134,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> --}}
 
     </main>
 
@@ -257,7 +146,7 @@
                 question.addEventListener('click', function() {
                     const answer = this.nextElementSibling;
                     const icon = this.querySelector('i');
-                    
+
                     if (answer.classList.contains('hidden')) {
                         answer.classList.remove('hidden');
                         icon.style.transform = 'rotate(180deg)';
@@ -275,7 +164,7 @@
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const category = this.getAttribute('data-category');
-                    
+
                     // Update active button
                     categoryBtns.forEach(b => {
                         b.classList.remove('active', 'bg-primary-500', 'text-white');
@@ -283,7 +172,7 @@
                     });
                     this.classList.add('active', 'bg-primary-500', 'text-white');
                     this.classList.remove('bg-slate-100', 'text-slate-700');
-                    
+
                     // Filter FAQ items
                     faqItems.forEach(item => {
                         if (category === 'all' || item.getAttribute('data-category') === category) {
@@ -299,11 +188,11 @@
             const searchInput = document.querySelector('input[placeholder="Search FAQs..."]');
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
-                
+
                 faqItems.forEach(item => {
                     const question = item.querySelector('.faq-question h3').textContent.toLowerCase();
                     const answer = item.querySelector('.faq-answer p').textContent.toLowerCase();
-                    
+
                     if (question.includes(searchTerm) || answer.includes(searchTerm)) {
                         item.style.display = 'block';
                     } else {

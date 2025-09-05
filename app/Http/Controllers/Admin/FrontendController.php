@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BlogCategory;
 use App\Models\BlogArticle;
 use App\Models\Page;
+use App\Models\Faqs;
 use App\Models\Tag;
 use App\Models\WebSetting;
 use App\Models\User;
@@ -36,8 +37,10 @@ public function home()
 */
 public function faqs()
 {
-
-    return view("frontend.faqs");
+    $page = Page::where('slug', 'contact-us')->firstOrFail();
+    $setting = WebSetting::first();
+    $faqs = Faqs::take(4)->get();
+    return view("frontend.faqs",compact('page','setting','faqs'));
 }
 public function worddetail()
 {
@@ -359,6 +362,7 @@ public function contact()
 {
     $page = Page::where('slug', 'contact-us')->firstOrFail();
     $setting = WebSetting::first();
+    $faq= Faqs::take(4)->get();
 
     $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
     $meta_title = $page->page_name ?? "$site_name - Contact Us";
@@ -434,7 +438,7 @@ public function contact()
 
     $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.contact-us', compact('page', 'setting', 'schemaMarkup'));
+    return view('frontend.contact-us', compact('page', 'setting', 'schemaMarkup','faq'));
 }
 
 /*
@@ -768,7 +772,7 @@ public function disclaimer()
 
     $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.discalimer', compact('page', 'setting', 'schemaMarkup'));
+    return view('frontend.disclaimer', compact('page', 'setting', 'schemaMarkup'));
 }
 
 /*
