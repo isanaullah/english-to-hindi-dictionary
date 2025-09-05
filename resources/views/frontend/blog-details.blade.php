@@ -18,21 +18,21 @@
                     <span class="bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-medium mr-3">Featured</span>
                     <span class="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium">Learning Tips</span>
                 </div>
-                
-                <h1 class="text-4xl md:text-5xl font-bold dark-text mb-6">10 Essential Hindi Phrases Every Beginner Should Know</h1>
-                <p class="text-xl light-text mb-8 leading-relaxed">Master these fundamental Hindi expressions to start meaningful conversations and build confidence in your language learning journey. From greetings to everyday expressions, these phrases will serve as your foundation.</p>
-                
+
+                <h1 class="text-4xl md:text-5xl font-bold dark-text mb-6">{{$article->title}}</h1>
+                <p class="text-xl light-text mb-8 leading-relaxed">{{$article->meta_desc}}</p>
+
                 <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
                     <div class="flex items-center">
                         <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-4">
                             <span class="text-primary-600 font-bold">AK</span>
                         </div>
                         <div>
-                            <p class="dark-text font-semibold">Arjun Kumar</p>
-                            <p class="light-text text-sm">December 15, 2023 • 5 min read</p>
+                            <p class="dark-text font-semibold">{{$setting->site_author}}</p>
+                            <p class="light-text text-sm">{{ $article->created_at->format('F d, Y') }}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-center space-x-4">
                         <button class="flex items-center space-x-2 text-slate-600 hover:text-primary-600 transition-colors duration-200">
                             <i class="far fa-heart"></i>
@@ -209,7 +209,7 @@
         <section class="mb-16">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-3xl font-bold dark-text text-center mb-10 section-title">Related Articles</h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <article class="glassmorphism p-6 rounded-2xl shadow-md word-card">
                         <div class="flex items-center mb-4">

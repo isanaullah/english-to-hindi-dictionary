@@ -39,7 +39,7 @@ return [
             'url'         => null,                         // Auto-detect current URL
             'type'        => 'website',                    // Default type
             'site_name'   => 'Estate Guide Blog',
-            'images'      => [asset('storage/settings/default-og-image.jpg')], // ✅ Replace with your default OG image
+            'images'      => ['storage/settings/default-og-image.jpg'], // ✅ Replace with your default OG image
         ],
     ],
 

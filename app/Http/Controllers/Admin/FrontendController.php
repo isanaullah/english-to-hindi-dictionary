@@ -79,7 +79,7 @@ public function bloglist(Request $request, $categorySlug = null)
             $blogs = BlogArticle::where('blog_category_id', $category->id)
                 ->where('status', 1)
                 ->orderBy('updated_at', 'desc') // newest first
-                ->paginate(10);
+                ->paginate(06);
         } else {
             $blogs = collect();
         }
@@ -89,7 +89,7 @@ public function bloglist(Request $request, $categorySlug = null)
                 $query->where('status', 1);
             })
             ->orderBy('updated_at', 'desc') // newest first
-            ->paginate(10);
+            ->paginate(06);
     }
 
     // Attach instructor data
@@ -227,13 +227,13 @@ public function blogshow(BlogArticle $articleArticle, $slug)
     $categories = BlogCategory::orderby('views_count', 'desc')->where('status','1')->take(7)->get();
     $recentposts = BlogArticle::orderby('updated_at', 'desc')->where('status','1')->take(4)->get();
 
-    $comments = $article->comments()
-        ->whereNull('parent_id')
-        ->where('is_approved', true)
-        ->with(['replies' => function ($query) {
-            $query->where('is_approved', true);
-        }])
-        ->get();
+    // $comments = $article->comments()
+    //     ->whereNull('parent_id')
+    //     ->where('is_approved', true)
+    //     ->with(['replies' => function ($query) {
+    //         $query->where('is_approved', true);
+    //     }])
+    //     ->get();
 
     $popularposts = BlogArticle::with('category')->where('status', '1')
         ->where('id', '!=', $article->id)
@@ -281,11 +281,11 @@ public function blogshow(BlogArticle $articleArticle, $slug)
         "author" => [
             "@type" => "Person",
             "name" => $instructor->name ?? 'Admin',
-            "sameAs" => [
-                $instructor->twitter ? "https://twitter.com/{$instructor->twitter}" : null,
-                $instructor->insta ? "https://instagram.com/{$instructor->insta}" : null,
-                // Add more social links if available
-            ]
+            // "sameAs" => [
+            //     $instructor->twitter ? "https://twitter.com/{$instructor->twitter}" : null,
+            //     $instructor->insta ? "https://instagram.com/{$instructor->insta}" : null,
+            //     // Add more social links if available
+            // ]
         ],
         "publisher" => [
             "@type" => "Organization",
@@ -300,7 +300,7 @@ public function blogshow(BlogArticle $articleArticle, $slug)
     ];
 
     // Remove null values (for example, missing social URLs)
-    $schemaData['author']['sameAs'] = array_values(array_filter($schemaData['author']['sameAs']));
+    // $schemaData['author']['sameAs'] = array_values(array_filter($schemaData['author']['sameAs']));
 
     $schemaMarkup = json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -343,7 +343,7 @@ public function blogshow(BlogArticle $articleArticle, $slug)
         'tags',
         'categories',
         'recentposts',
-        'comments',
+        // 'comments',
         'schemaMarkup',
         'breadcrumbsMarkup'
     ));
