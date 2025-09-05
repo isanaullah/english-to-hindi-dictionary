@@ -10,7 +10,9 @@ use App\Models\Faqs;
 use App\Models\Tag;
 use App\Models\WebSetting;
 use App\Models\User;
+use App\Models\Words;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 //For Schema
 use Spatie\SchemaOrg\Schema;
 use Artesaos\SEOTools\Facades\OpenGraph;
@@ -42,11 +44,45 @@ public function faqs()
     $faqs = Faqs::take(4)->get();
     return view("frontend.faqs",compact('page','setting','faqs'));
 }
-public function worddetail()
+public function worddetail($slug)
 {
+    $page = Page::where('slug', 'contact-us')->firstOrFail();
+    $setting = WebSetting::first();
 
-    return view("frontend.word-detail");
+    // Find the main word
+    $words = Words::where('word', $slug)->firstOrFail();
+    // Word statistics
+    $wordLength = strlen($words->word);
+
+    // Dummy syllable splitter (replace with proper algorithm if needed)
+    $syllables = preg_split('/[aeiouy]+/i', $words->word);
+    $syllableCount = count(array_filter($syllables)) ?: 1;
+
+    // Try to get similar words
+    $similarWords = Words::where('word', 'LIKE', $words->word . '%')
+        ->where('id', '!=', $words->id)
+        ->take(3)
+        ->get();
+
+    // If no similar words found, fetch latest 3 words instead
+    if ($similarWords->isEmpty()) {
+        $similarWords = Words::where('id', '!=', $words->id)
+            ->latest()
+            ->take(3)
+            ->get();
+    }
+
+    // 🔹 Word of the Day (same for the whole day, auto changes next day)
+    $total = Words::count();
+    $wordOfTheDay = null;
+    if ($total > 0) {
+        $dayIndex = now()->dayOfYear % $total;
+        $wordOfTheDay = Words::skip($dayIndex)->first();
+    }
+
+    return view("frontend.word-detail", compact('setting', 'page', 'words', 'similarWords', 'wordOfTheDay','wordLength','syllables','syllableCount'));
 }
+
 
 /*
 |--------------------------------------------------------------------------
@@ -111,8 +147,11 @@ public function words()
     // Get unique categories for filtering
     $categories = array_unique(array_column($words, 'category'));
     sort($categories);
-
-    return view("frontend.words", compact('words', 'categories'));
+    $page       = Page::where('slug', 'blog-listing')->first();
+    $setting    = WebSetting::first();
+    $words = Words::paginate(20);
+    $count = $words->count();
+    return view("frontend.words", compact('words', 'categories','words','count'));
 }
 
 /*

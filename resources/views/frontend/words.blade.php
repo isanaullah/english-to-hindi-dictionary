@@ -17,10 +17,10 @@
         <div class="flex flex-col md:flex-row gap-4 items-center">
             <!-- Search Input -->
             <div class="flex-1 relative">
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     id="searchInput"
-                    placeholder="Search for words..." 
+                    placeholder="Search for words..."
                     class="w-full px-4 py-3 pl-12 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -28,7 +28,7 @@
 
             <!-- Category Filter -->
             <div class="relative">
-                <select 
+                <select
                     id="categoryFilter"
                     class="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
                 >
@@ -41,7 +41,7 @@
 
             <!-- Sort Options -->
             <div class="relative">
-                <select 
+                <select
                     id="sortFilter"
                     class="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
                 >
@@ -55,7 +55,7 @@
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="glassmorphism p-6 text-center">
-            <div class="text-3xl font-bold gradient-text mb-2" id="totalWords">{{ count($words) }}</div>
+            <div class="text-3xl font-bold gradient-text mb-2" id="totalWords">{{ $count }}</div>
             <div class="text-slate-600">Total Words</div>
         </div>
         <div class="glassmorphism p-6 text-center">
@@ -63,7 +63,7 @@
             <div class="text-slate-600">Categories</div>
         </div>
         <div class="glassmorphism p-6 text-center">
-            <div class="text-3xl font-bold gradient-text mb-2" id="filteredCount">{{ count($words) }}</div>
+            <div class="text-3xl font-bold gradient-text mb-2" id="filteredCount">{{ $words->count() }}</div>
             <div class="text-slate-600">Showing</div>
         </div>
     </div>
@@ -71,35 +71,40 @@
     <!-- Words Grid -->
     <div id="wordsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($words as $word)
-        <div class="word-card glassmorphism p-6 rounded-lg hover:shadow-xl transition-all duration-300" 
-             data-word="{{ strtolower($word['word']) }}" 
+        <div class="word-card glassmorphism p-6 rounded-lg hover:shadow-xl transition-all duration-300"
+             data-word="{{ strtolower($word['word']) }}"
              data-category="{{ $word['category'] }}">
-            
+
             <!-- Category Badge -->
-            <div class="flex justify-between items-start mb-4">
+            {{-- <div class="flex justify-between items-start mb-4">
                 <span class="category-badge bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">
                     {{ $word['category'] }}
                 </span>
                 <button class="text-slate-400 hover:text-primary-500 transition-colors" onclick="speakWord('{{ $word['word'] }}')">
                     <i class="fas fa-volume-up"></i>
                 </button>
-            </div>
+            </div> --}}
 
             <!-- English Word -->
             <div class="mb-3">
-                <h3 class="text-xl font-bold text-slate-800 mb-1">{{ $word['word'] }}</h3>
+                <h3 class="text-xl font-bold text-slate-800 mb-1">
+                    <a href="{{ route('worddetail', $word['word']) }}" class="hover:underline">
+                        {{ $word['word'] }}
+                    </a>
+                </h3>
                 <p class="text-sm text-slate-500">English</p>
             </div>
 
+
             <!-- Hindi Translation -->
             <div class="mb-3">
-                <h4 class="text-2xl font-bold hindi-font text-primary-600 mb-1">{{ $word['hindi'] }}</h4>
+                <h4 class="text-2xl font-bold hindi-font text-primary-600 mb-1">{{ $word['meaning'] }}</h4>
                 <p class="text-sm text-slate-500">Hindi</p>
             </div>
 
             <!-- Transliteration -->
             <div class="mb-4">
-                <p class="text-lg font-medium text-accent-600 mb-1">{{ $word['transliteration'] }}</p>
+                <p class="text-lg font-medium text-accent-600 mb-1">{{ $word['pronunciation'] }}</p>
                 <p class="text-sm text-slate-500">Pronunciation</p>
             </div>
 
@@ -140,35 +145,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordsContainer = document.getElementById('wordsContainer');
     const noResults = document.getElementById('noResults');
     const filteredCount = document.getElementById('filteredCount');
-    
+
     let allWords = Array.from(document.querySelectorAll('.word-card'));
-    
+
     function filterAndSort() {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedCategory = categoryFilter.value;
         const sortBy = sortFilter.value;
-        
+
         // Filter words
         let filteredWords = allWords.filter(card => {
             const wordText = card.dataset.word;
             const category = card.dataset.category;
-            
+
             const matchesSearch = wordText.includes(searchTerm);
             const matchesCategory = !selectedCategory || category === selectedCategory;
-            
+
             return matchesSearch && matchesCategory;
         });
-        
+
         // Sort words
         if (sortBy === 'alphabetical') {
             filteredWords.sort((a, b) => a.dataset.word.localeCompare(b.dataset.word));
         } else if (sortBy === 'category') {
             filteredWords.sort((a, b) => a.dataset.category.localeCompare(b.dataset.category));
         }
-        
+
         // Hide all cards first
         allWords.forEach(card => card.style.display = 'none');
-        
+
         // Show filtered cards
         if (filteredWords.length > 0) {
             filteredWords.forEach(card => card.style.display = 'block');
@@ -178,16 +183,16 @@ document.addEventListener('DOMContentLoaded', function() {
             wordsContainer.style.display = 'none';
             noResults.classList.remove('hidden');
         }
-        
+
         // Update count
         filteredCount.textContent = filteredWords.length;
     }
-    
+
     // Event listeners
     searchInput.addEventListener('input', filterAndSort);
     categoryFilter.addEventListener('change', filterAndSort);
     sortFilter.addEventListener('change', filterAndSort);
-    
+
     // Text-to-speech function
     window.speakWord = function(word) {
         if ('speechSynthesis' in window) {
@@ -197,30 +202,30 @@ document.addEventListener('DOMContentLoaded', function() {
             speechSynthesis.speak(utterance);
         }
     };
-    
+
     // Add animation on scroll
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '0';
                 entry.target.style.transform = 'translateY(20px)';
                 entry.target.style.transition = 'all 0.6s ease';
-                
+
                 setTimeout(() => {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
                 }, 100);
-                
+
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
-    
+
     allWords.forEach(card => {
         observer.observe(card);
     });

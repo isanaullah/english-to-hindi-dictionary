@@ -47,7 +47,7 @@ Route::get('/generate-sitemap', [SitemapController::class, 'generate'])->name('g
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'home')->name('home');
     Route::get('/contact-us', 'contact')->name('contact-us');
-    Route::get('/detail', 'worddetail')->name('worddetail');
+    Route::get('/word/{slug}', 'worddetail')->name('worddetail');
     Route::get('/words', 'words')->name('words');
     Route::get('/login1', 'login')->name('login1');
     // Route::post('/login', 'loginPost')->name('login');
