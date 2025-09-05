@@ -217,6 +217,7 @@
 
             <div class="hidden md:flex space-x-8">
                 <a href="{{route('home')}}" class="nav-link font-medium">Home</a>
+                <a href="{{route('words')}}" class="nav-link font-medium">Words</a>
                 <a href="{{route('worddetail')}}" class="nav-link font-medium">Browse</a>
                 {{-- <a href="#" class="nav-link font-medium">Word of the Day</a>
                 <a href="#" class="nav-link font-medium">Grammar</a> --}}

@@ -50,6 +50,73 @@ public function worddetail()
 
 /*
 |--------------------------------------------------------------------------
+| Words Listing
+|--------------------------------------------------------------------------
+*/
+public function words()
+{
+    // Sample dictionary words data - in a real application, this would come from a database
+    $words = [
+        ['word' => 'Hello', 'hindi' => 'नमस्ते', 'transliteration' => 'Namaste', 'category' => 'Greetings'],
+        ['word' => 'Thank you', 'hindi' => 'धन्यवाद', 'transliteration' => 'Dhanyawad', 'category' => 'Greetings'],
+        ['word' => 'Water', 'hindi' => 'पानी', 'transliteration' => 'Paani', 'category' => 'Nature'],
+        ['word' => 'Food', 'hindi' => 'खाना', 'transliteration' => 'Khaana', 'category' => 'Food'],
+        ['word' => 'House', 'hindi' => 'घर', 'transliteration' => 'Ghar', 'category' => 'Home'],
+        ['word' => 'Family', 'hindi' => 'परिवार', 'transliteration' => 'Parivaar', 'category' => 'Relationships'],
+        ['word' => 'Friend', 'hindi' => 'दोस्त', 'transliteration' => 'Dost', 'category' => 'Relationships'],
+        ['word' => 'Book', 'hindi' => 'किताब', 'transliteration' => 'Kitaab', 'category' => 'Education'],
+        ['word' => 'School', 'hindi' => 'स्कूल', 'transliteration' => 'School', 'category' => 'Education'],
+        ['word' => 'Teacher', 'hindi' => 'शिक्षक', 'transliteration' => 'Shikshak', 'category' => 'Education'],
+        ['word' => 'Student', 'hindi' => 'छात्र', 'transliteration' => 'Chhaatra', 'category' => 'Education'],
+        ['word' => 'Time', 'hindi' => 'समय', 'transliteration' => 'Samay', 'category' => 'Time'],
+        ['word' => 'Day', 'hindi' => 'दिन', 'transliteration' => 'Din', 'category' => 'Time'],
+        ['word' => 'Night', 'hindi' => 'रात', 'transliteration' => 'Raat', 'category' => 'Time'],
+        ['word' => 'Morning', 'hindi' => 'सुबह', 'transliteration' => 'Subah', 'category' => 'Time'],
+        ['word' => 'Evening', 'hindi' => 'शाम', 'transliteration' => 'Shaam', 'category' => 'Time'],
+        ['word' => 'Love', 'hindi' => 'प्रेम', 'transliteration' => 'Prem', 'category' => 'Emotions'],
+        ['word' => 'Happy', 'hindi' => 'खुश', 'transliteration' => 'Khush', 'category' => 'Emotions'],
+        ['word' => 'Sad', 'hindi' => 'उदास', 'transliteration' => 'Udaas', 'category' => 'Emotions'],
+        ['word' => 'Beautiful', 'hindi' => 'सुंदर', 'transliteration' => 'Sundar', 'category' => 'Adjectives'],
+        ['word' => 'Good', 'hindi' => 'अच्छा', 'transliteration' => 'Achha', 'category' => 'Adjectives'],
+        ['word' => 'Bad', 'hindi' => 'बुरा', 'transliteration' => 'Bura', 'category' => 'Adjectives'],
+        ['word' => 'Big', 'hindi' => 'बड़ा', 'transliteration' => 'Bada', 'category' => 'Adjectives'],
+        ['word' => 'Small', 'hindi' => 'छोटा', 'transliteration' => 'Chota', 'category' => 'Adjectives'],
+        ['word' => 'Red', 'hindi' => 'लाल', 'transliteration' => 'Laal', 'category' => 'Colors'],
+        ['word' => 'Blue', 'hindi' => 'नीला', 'transliteration' => 'Neela', 'category' => 'Colors'],
+        ['word' => 'Green', 'hindi' => 'हरा', 'transliteration' => 'Hara', 'category' => 'Colors'],
+        ['word' => 'Yellow', 'hindi' => 'पीला', 'transliteration' => 'Peela', 'category' => 'Colors'],
+        ['word' => 'White', 'hindi' => 'सफेद', 'transliteration' => 'Safed', 'category' => 'Colors'],
+        ['word' => 'Black', 'hindi' => 'काला', 'transliteration' => 'Kaala', 'category' => 'Colors'],
+        ['word' => 'Mother', 'hindi' => 'माँ', 'transliteration' => 'Maa', 'category' => 'Family'],
+        ['word' => 'Father', 'hindi' => 'पिता', 'transliteration' => 'Pita', 'category' => 'Family'],
+        ['word' => 'Brother', 'hindi' => 'भाई', 'transliteration' => 'Bhai', 'category' => 'Family'],
+        ['word' => 'Sister', 'hindi' => 'बहन', 'transliteration' => 'Bahan', 'category' => 'Family'],
+        ['word' => 'Son', 'hindi' => 'बेटा', 'transliteration' => 'Beta', 'category' => 'Family'],
+        ['word' => 'Daughter', 'hindi' => 'बेटी', 'transliteration' => 'Beti', 'category' => 'Family'],
+        ['word' => 'Money', 'hindi' => 'पैसा', 'transliteration' => 'Paisa', 'category' => 'Finance'],
+        ['word' => 'Work', 'hindi' => 'काम', 'transliteration' => 'Kaam', 'category' => 'Work'],
+        ['word' => 'Office', 'hindi' => 'दफ्तर', 'transliteration' => 'Daftar', 'category' => 'Work'],
+        ['word' => 'Car', 'hindi' => 'गाड़ी', 'transliteration' => 'Gaadi', 'category' => 'Transport'],
+        ['word' => 'Train', 'hindi' => 'रेलगाड़ी', 'transliteration' => 'Relgaadi', 'category' => 'Transport'],
+        ['word' => 'Bus', 'hindi' => 'बस', 'transliteration' => 'Bus', 'category' => 'Transport'],
+        ['word' => 'Road', 'hindi' => 'सड़क', 'transliteration' => 'Sadak', 'category' => 'Transport'],
+        ['word' => 'Market', 'hindi' => 'बाज़ार', 'transliteration' => 'Bazaar', 'category' => 'Places'],
+        ['word' => 'Hospital', 'hindi' => 'अस्पताल', 'transliteration' => 'Aspatal', 'category' => 'Places'],
+        ['word' => 'Temple', 'hindi' => 'मंदिर', 'transliteration' => 'Mandir', 'category' => 'Places'],
+        ['word' => 'City', 'hindi' => 'शहर', 'transliteration' => 'Shahar', 'category' => 'Places'],
+        ['word' => 'Village', 'hindi' => 'गाँव', 'transliteration' => 'Gaanv', 'category' => 'Places'],
+        ['word' => 'Country', 'hindi' => 'देश', 'transliteration' => 'Desh', 'category' => 'Places']
+    ];
+
+    // Get unique categories for filtering
+    $categories = array_unique(array_column($words, 'category'));
+    sort($categories);
+
+    return view("frontend.words", compact('words', 'categories'));
+}
+
+/*
+|--------------------------------------------------------------------------
 | Login
 |--------------------------------------------------------------------------
 */
