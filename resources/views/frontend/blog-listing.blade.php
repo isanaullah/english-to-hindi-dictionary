@@ -12,12 +12,12 @@
 
             <!-- Search Blog -->
             <div class="relative w-full max-w-xl mb-8">
-                <div class="flex">
-                    <input type="text" placeholder="Search blog posts..." class="w-full px-6 py-4 rounded-l-2xl shadow-md focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 border border-r-0 border-slate-200">
-                    <button class="bg-primary-500 text-white px-6 py-4 rounded-r-2xl font-semibold hover:bg-primary-600 transition-all duration-300 flex items-center">
+                <form method="GET" action="{{ route('bloglist') }}" class="flex">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search blog posts..." class="w-full px-6 py-4 rounded-l-2xl shadow-md focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 border border-r-0 border-slate-200">
+                    <button type="submit" class="bg-primary-500 text-white px-6 py-4 rounded-r-2xl font-semibold hover:bg-primary-600 transition-all duration-300 flex items-center">
                         <i class="fas fa-search"></i>
                     </button>
-                </div>
+                </form>
             </div>
         </section>
 
@@ -73,10 +73,34 @@
             @endif
         </section>
 
+        <!-- Search Results Info -->
+        @if(request('search'))
+        <section class="my-8">
+            <div class="glassmorphism p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-search text-primary-600 mr-2"></i>
+                        <span class="dark-text">Search results for: <strong>"{{ request('search') }}"</strong></span>
+                        <span class="ml-2 text-sm light-text">({{ $blogs->total() }} {{ Str::plural('result', $blogs->total()) }} found)</span>
+                    </div>
+                    <a href="{{ route('bloglist') }}" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                        <i class="fas fa-times mr-1"></i> Clear Search
+                    </a>
+                </div>
+            </div>
+        </section>
+        @endif
+
         <!-- Blog Posts Grid -->
         <section class="my-16">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-bold dark-text section-title">Latest Articles</h2>
+                <h2 class="text-3xl font-bold dark-text section-title">
+                    @if(request('search'))
+                        Search Results
+                    @else
+                        Latest Articles
+                    @endif
+                </h2>
                 <div class="flex items-center space-x-4">
                     <span class="light-text text-sm">Sort by:</span>
                     <select class="px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-300">
@@ -87,8 +111,8 @@
                 </div>
             </div>
 
+            @if($blogs->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Blog Post 1 -->
                 @foreach ($blogs as $bc)
                 <article class="glassmorphism p-6 rounded-2xl shadow-md word-card">
                     <div class="flex items-center mb-4">
@@ -111,24 +135,39 @@
                 </article>
                 @endforeach
             </div>
+            @else
+            <!-- No Results Found -->
+            <div class="text-center py-16">
+                <div class="glassmorphism p-8 rounded-2xl max-w-md mx-auto">
+                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-2xl text-slate-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold dark-text mb-2">No Results Found</h3>
+                    <p class="light-text mb-4">
+                        @if(request('search'))
+                            No blog posts found for "{{ request('search') }}". Try different keywords or browse all posts.
+                        @else
+                            No blog posts available at the moment.
+                        @endif
+                    </p>
+                    @if(request('search'))
+                    <a href="{{ route('bloglist') }}" class="bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-all duration-300 inline-flex items-center">
+                        <i class="fas fa-arrow-left mr-2"></i> View All Posts
+                    </a>
+                    @endif
+                </div>
+            </div>
+            @endif
         </section>
 
         <!-- Pagination -->
+        @if($blogs->hasPages())
         <section class="my-16">
-            <div class="flex justify-center items-center space-x-2">
-                <button class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="px-4 py-2 rounded-lg bg-primary-500 text-white font-medium">1</button>
-                <button class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200">2</button>
-                <button class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200">3</button>
-                <span class="px-2 text-slate-400">...</span>
-                <button class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200">10</button>
-                <button class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+            <div class="flex justify-center">
+                {{ $blogs->links('pagination::tailwind') }}
             </div>
         </section>
+        @endif
 
         <!-- Newsletter Signup -->
         <section class="my-16">

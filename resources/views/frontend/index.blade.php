@@ -100,7 +100,7 @@
                     <div>
                         <div class="flex items-center">
                             <h3 class="text-2xl font-bold dark-text"><a
-                                    href="{{ route('worddetail', Str::slug($wordOfTheDay->word, '-')) }}">{{ $wordOfTheDay->word }}</a>
+                                    href="{{ route('worddetail', $wordOfTheDay->slug) }}">{{ $wordOfTheDay->word }}</a>
                             </h3>
                             @if ($wordOfTheDay->part_of_speech)
                                 <span class="ml-3 text-accent-600 bg-accent-100 px-2 py-1 rounded text-sm">
@@ -264,7 +264,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-xl font-bold dark-text">
-                                <a href="{{ route('worddetail', Str::slug($word->word, '-')) }}">{{ $word->word }}</a>
+                                <a href="{{ route('worddetail', $word->slug) }}">{{ $word->word }}</a>
                             </h3>
                             <p class="hindi-font text-primary-600 text-lg">{{ $word->translation ?? '' }}</p>
                         </div>

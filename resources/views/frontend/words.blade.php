@@ -79,7 +79,7 @@
                 <div class="mb-3">
                     <h3 class="text-xl font-bold text-slate-800 mb-1">
                         <p class="text-sm text-slate-500">English</p>
-                        <a href="{{ route('worddetail', Str::slug($word->word, '-')) }}" class="hover:underline">
+                        <a href="{{ route('worddetail', $word->slug) }}" class="hover:underline">
                             {{ $word->word }}
                         </a>
                     </h3>

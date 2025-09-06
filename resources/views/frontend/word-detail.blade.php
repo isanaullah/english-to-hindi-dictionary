@@ -257,7 +257,7 @@
                         <h3 class="text-lg font-semibold dark-text mb-4">Related Words</h3>
                         <div class="space-y-3">
                             @foreach ($similarWords as $related)
-                                <a href="{{ route('worddetail', Str::slug($related->word, '-')) }}"
+                                <a href="{{ route('worddetail', $related->slug) }}"
                                     class="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors duration-200">
                                     <div class="flex justify-between items-center">
                                         <span class="font-medium dark-text">{{ $related->word }}</span>
@@ -280,7 +280,7 @@
                             <h4 class="font-bold dark-text mb-1">{{ $wordOfTheDay->word }}</h4>
                             <p class="text-primary-600 hindi-font mb-2">{{ $wordOfTheDay->meaning }}</p>
                             <p class="text-sm light-text">{{ $wordOfTheDay->pronunciation }}</p>
-                            <a href="{{ route('worddetail', Str::slug($wordOfTheDay->word, '-')) }}"
+                            <a href="{{ route('worddetail', $wordOfTheDay->slug) }}"
                                 class="text-primary-600 hover:text-primary-700 text-sm font-medium mt-2 inline-block">
                                 Learn More <i class="fas fa-arrow-right ml-1"></i>
                             </a>
@@ -323,7 +323,7 @@
                         <p class="light-text text-sm mb-4">{{ $words->pronunciation }}</p>
 
                         <!-- View details link -->
-                        <a href="{{ route('worddetail', Str::slug($words->word, '-')) }}"
+                        <a href="{{ route('worddetail', $words->slug) }}"
                             class="text-primary-600 hover:text-primary-700 transition-colors duration-200 text-sm font-medium">
                             View Details <i class="fas fa-arrow-right ml-1"></i>
                         </a>

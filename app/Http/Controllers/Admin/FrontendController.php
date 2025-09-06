@@ -71,38 +71,51 @@ class FrontendController extends Controller
 */
 
 
+// use Illuminate\Support\Str;
+
 public function worddetail($slug)
 {
-    // Convert slug back into spaced form
-    $cleanWord = str_replace('-', ' ', $slug);
+    // Find the word by slug first, fallback to word field for backward compatibility
+    $words = Words::where('slug', $slug)->first();
 
-    // Case-insensitive match
-    $words = Words::whereRaw('LOWER(word) = ?', [strtolower($cleanWord)])
-                  ->firstOrFail();
+    if (!$words) {
+        // Fallback: try to find by word field (for backward compatibility)
+        $decodedSlug = urldecode($slug);
+        $words = Words::where('word', $decodedSlug)
+            ->orWhereRaw('LOWER(word) = ?', [strtolower($decodedSlug)])
+            ->firstOrFail();
+    }
+
+    // Get homepage info
     $homePage = Page::where('slug', 'home')->first();
-
     $page = [
         'page_name' => $words->word . ' Meaning in Hindi | ' . ($homePage ? $homePage->page_name : 'Dictionary')
     ];
+
+    // Web settings
     $setting = WebSetting::first();
 
+    // Word length (excluding spaces)
     $wordLength = strlen(str_replace(' ', '', $words->word));
+
+    // Syllable count approximation
     $syllables = preg_split('/[aeiouy]+/i', $words->word);
     $syllableCount = count(array_filter($syllables)) ?: 1;
 
-    // Try to get similar words
+    // Similar words (starting with same letters)
     $similarWords = Words::where('word', 'LIKE', $words->word . '%')
-        ->where('id', '!=', $words->id)
+        ->where('slug', '!=', $words->slug)
         ->take(3)
         ->get();
 
     if ($similarWords->isEmpty()) {
-        $similarWords = Words::where('id', '!=', $words->id)
+        $similarWords = Words::where('slug', '!=', $words->slug)
             ->latest()
             ->take(3)
             ->get();
     }
 
+    // Word of the day
     $total = Words::count();
     $wordOfTheDay = null;
     if ($total > 0) {
@@ -121,6 +134,7 @@ public function worddetail($slug)
         'syllableCount'
     ));
 }
+
 
 
 
@@ -197,28 +211,41 @@ public function worddetail($slug)
         $setting    = WebSetting::first();
         $site_name  = config('seotools.opengraph.defaults.site_name', config('app.name'));
 
-        // Blogs fetching
+        // Start building the query
+        $query = BlogArticle::where('status', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('status', 1);
+            });
+
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Apply category filter
         if ($categorySlug) {
             $category = BlogCategory::where('slug', $categorySlug)
                 ->where('status', 1)
                 ->first();
 
             if ($category) {
-                $blogs = BlogArticle::where('blog_category_id', $category->id)
-                    ->where('status', 1)
-                    ->orderBy('updated_at', 'desc') // newest first
-                    ->paginate(06);
+                $query->where('blog_category_id', $category->id);
             } else {
                 $blogs = collect();
+                goto skipQuery;
             }
-        } else {
-            $blogs = BlogArticle::where('status', 1)
-                ->whereHas('category', function ($query) {
-                    $query->where('status', 1);
-                })
-                ->orderBy('updated_at', 'desc') // newest first
-                ->paginate(06);
         }
+
+        // Get paginated results
+        $blogs = $query->orderBy('updated_at', 'desc')
+                      ->paginate(6)
+                      ->appends($request->query());
+
+        skipQuery:
 
         // Attach instructor data
         foreach ($blogs as $bc) {
@@ -267,12 +294,12 @@ public function worddetail($slug)
                 "position"  => $index + 1,
                 "url"       => route('blogshow', $blog->slug),
                 "name"      => $blog->title,
-                "description" => $blog->meta_desc ?? $blog->excerpt,
+                "description" => $blog->meta_desc ?? $blog->description,
                 "image"     => $blog->image ? asset('storage/' . $blog->image) : null,
                 "item"      => [
                     "@type"        => "Article",
                     "headline"     => $blog->title,
-                    "description"  => $blog->meta_desc ?? $blog->excerpt,
+                    "description"  => $blog->meta_desc ?? $blog->description,
                     "datePublished" => $blog->created_at->toIso8601String(),
                     "author"       => [
                         "@type" => "Person",
