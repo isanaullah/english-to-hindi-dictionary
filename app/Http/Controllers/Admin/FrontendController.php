@@ -19,42 +19,71 @@ use Artesaos\SEOTools\Facades\OpenGraph;
 use Artesaos\SEOTools\Facades\TwitterCard;
 use Artesaos\SEOTools\Facades\JsonLd;
 use Artesaos\SEOTools\Facades\SEOTools; // Complete SEO tool for flexibility
+use Illuminate\Support\Facades\Cache;
+
 class FrontendController extends Controller
 {
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Index
 |--------------------------------------------------------------------------
 */
-public function home()
-{
+    public function home()
+    {
+        $setting = WebSetting::first();
+        $page = Page::where('slug', 'home')->first(); // optional, if you use a home page record
 
-    return view("frontend.index");
-}
+        // 🔹 Word of the Day logic (same as in worddetail)
+        $total = Words::count();
+        $wordOfTheDay = null;
+        if ($total > 0) {
+            $dayIndex = now()->dayOfYear % $total;
+            $wordOfTheDay = Words::skip($dayIndex)->first();
+        }
+        $popularWords = Cache::remember('popular_words', 1440, function () {
+            return Words::inRandomOrder()->take(4)->get();
+        });
+        // Cache::forget('popular_words');
+        // $popularWords = Cache::remember('popular_words', now()->addSeconds(20), function () {
+        //     return Words::inRandomOrder()->take(4)->get();
+        // });
+
+        return view("frontend.index", compact('setting', 'page', 'wordOfTheDay', 'popularWords'));
+    }
+
 /*
 |--------------------------------------------------------------------------
 | Faqs
 |--------------------------------------------------------------------------
 */
-public function faqs()
-{
-    $page = Page::where('slug', 'contact-us')->firstOrFail();
-    $setting = WebSetting::first();
-    $faqs = Faqs::take(4)->get();
-    return view("frontend.faqs",compact('page','setting','faqs'));
-}
+    public function faqs()
+    {
+        $page = Page::where('slug', 'contact-us')->firstOrFail();
+        $setting = WebSetting::first();
+        $faqs = Faqs::take(4)->get();
+        return view("frontend.faqs", compact('page', 'setting', 'faqs'));
+    }
+/*
+|--------------------------------------------------------------------------
+| Word Detail
+|--------------------------------------------------------------------------
+*/
+
+
 public function worddetail($slug)
 {
+    // Convert slug back into spaced form
+    $cleanWord = str_replace('-', ' ', $slug);
+
+    // Case-insensitive match
+    $words = Words::whereRaw('LOWER(word) = ?', [strtolower($cleanWord)])
+                  ->firstOrFail();
+
     $page = Page::where('slug', 'contact-us')->firstOrFail();
     $setting = WebSetting::first();
 
-    // Find the main word
-    $words = Words::where('word', $slug)->firstOrFail();
-    // Word statistics
-    $wordLength = strlen($words->word);
-
-    // Dummy syllable splitter (replace with proper algorithm if needed)
+    $wordLength = strlen(str_replace(' ', '', $words->word));
     $syllables = preg_split('/[aeiouy]+/i', $words->word);
     $syllableCount = count(array_filter($syllables)) ?: 1;
 
@@ -64,7 +93,6 @@ public function worddetail($slug)
         ->take(3)
         ->get();
 
-    // If no similar words found, fetch latest 3 words instead
     if ($similarWords->isEmpty()) {
         $similarWords = Words::where('id', '!=', $words->id)
             ->latest()
@@ -72,7 +100,6 @@ public function worddetail($slug)
             ->get();
     }
 
-    // 🔹 Word of the Day (same for the whole day, auto changes next day)
     $total = Words::count();
     $wordOfTheDay = null;
     if ($total > 0) {
@@ -80,818 +107,804 @@ public function worddetail($slug)
         $wordOfTheDay = Words::skip($dayIndex)->first();
     }
 
-    return view("frontend.word-detail", compact('setting', 'page', 'words', 'similarWords', 'wordOfTheDay','wordLength','syllables','syllableCount'));
+    return view("frontend.word-detail", compact(
+        'setting',
+        'page',
+        'words',
+        'similarWords',
+        'wordOfTheDay',
+        'wordLength',
+        'syllables',
+        'syllableCount'
+    ));
 }
 
 
-/*
+
+    /*
 |--------------------------------------------------------------------------
 | Words Listing
 |--------------------------------------------------------------------------
 */
-public function words()
-{
-    // Sample dictionary words data - in a real application, this would come from a database
-    $words = [
-        ['word' => 'Hello', 'hindi' => 'नमस्ते', 'transliteration' => 'Namaste', 'category' => 'Greetings'],
-        ['word' => 'Thank you', 'hindi' => 'धन्यवाद', 'transliteration' => 'Dhanyawad', 'category' => 'Greetings'],
-        ['word' => 'Water', 'hindi' => 'पानी', 'transliteration' => 'Paani', 'category' => 'Nature'],
-        ['word' => 'Food', 'hindi' => 'खाना', 'transliteration' => 'Khaana', 'category' => 'Food'],
-        ['word' => 'House', 'hindi' => 'घर', 'transliteration' => 'Ghar', 'category' => 'Home'],
-        ['word' => 'Family', 'hindi' => 'परिवार', 'transliteration' => 'Parivaar', 'category' => 'Relationships'],
-        ['word' => 'Friend', 'hindi' => 'दोस्त', 'transliteration' => 'Dost', 'category' => 'Relationships'],
-        ['word' => 'Book', 'hindi' => 'किताब', 'transliteration' => 'Kitaab', 'category' => 'Education'],
-        ['word' => 'School', 'hindi' => 'स्कूल', 'transliteration' => 'School', 'category' => 'Education'],
-        ['word' => 'Teacher', 'hindi' => 'शिक्षक', 'transliteration' => 'Shikshak', 'category' => 'Education'],
-        ['word' => 'Student', 'hindi' => 'छात्र', 'transliteration' => 'Chhaatra', 'category' => 'Education'],
-        ['word' => 'Time', 'hindi' => 'समय', 'transliteration' => 'Samay', 'category' => 'Time'],
-        ['word' => 'Day', 'hindi' => 'दिन', 'transliteration' => 'Din', 'category' => 'Time'],
-        ['word' => 'Night', 'hindi' => 'रात', 'transliteration' => 'Raat', 'category' => 'Time'],
-        ['word' => 'Morning', 'hindi' => 'सुबह', 'transliteration' => 'Subah', 'category' => 'Time'],
-        ['word' => 'Evening', 'hindi' => 'शाम', 'transliteration' => 'Shaam', 'category' => 'Time'],
-        ['word' => 'Love', 'hindi' => 'प्रेम', 'transliteration' => 'Prem', 'category' => 'Emotions'],
-        ['word' => 'Happy', 'hindi' => 'खुश', 'transliteration' => 'Khush', 'category' => 'Emotions'],
-        ['word' => 'Sad', 'hindi' => 'उदास', 'transliteration' => 'Udaas', 'category' => 'Emotions'],
-        ['word' => 'Beautiful', 'hindi' => 'सुंदर', 'transliteration' => 'Sundar', 'category' => 'Adjectives'],
-        ['word' => 'Good', 'hindi' => 'अच्छा', 'transliteration' => 'Achha', 'category' => 'Adjectives'],
-        ['word' => 'Bad', 'hindi' => 'बुरा', 'transliteration' => 'Bura', 'category' => 'Adjectives'],
-        ['word' => 'Big', 'hindi' => 'बड़ा', 'transliteration' => 'Bada', 'category' => 'Adjectives'],
-        ['word' => 'Small', 'hindi' => 'छोटा', 'transliteration' => 'Chota', 'category' => 'Adjectives'],
-        ['word' => 'Red', 'hindi' => 'लाल', 'transliteration' => 'Laal', 'category' => 'Colors'],
-        ['word' => 'Blue', 'hindi' => 'नीला', 'transliteration' => 'Neela', 'category' => 'Colors'],
-        ['word' => 'Green', 'hindi' => 'हरा', 'transliteration' => 'Hara', 'category' => 'Colors'],
-        ['word' => 'Yellow', 'hindi' => 'पीला', 'transliteration' => 'Peela', 'category' => 'Colors'],
-        ['word' => 'White', 'hindi' => 'सफेद', 'transliteration' => 'Safed', 'category' => 'Colors'],
-        ['word' => 'Black', 'hindi' => 'काला', 'transliteration' => 'Kaala', 'category' => 'Colors'],
-        ['word' => 'Mother', 'hindi' => 'माँ', 'transliteration' => 'Maa', 'category' => 'Family'],
-        ['word' => 'Father', 'hindi' => 'पिता', 'transliteration' => 'Pita', 'category' => 'Family'],
-        ['word' => 'Brother', 'hindi' => 'भाई', 'transliteration' => 'Bhai', 'category' => 'Family'],
-        ['word' => 'Sister', 'hindi' => 'बहन', 'transliteration' => 'Bahan', 'category' => 'Family'],
-        ['word' => 'Son', 'hindi' => 'बेटा', 'transliteration' => 'Beta', 'category' => 'Family'],
-        ['word' => 'Daughter', 'hindi' => 'बेटी', 'transliteration' => 'Beti', 'category' => 'Family'],
-        ['word' => 'Money', 'hindi' => 'पैसा', 'transliteration' => 'Paisa', 'category' => 'Finance'],
-        ['word' => 'Work', 'hindi' => 'काम', 'transliteration' => 'Kaam', 'category' => 'Work'],
-        ['word' => 'Office', 'hindi' => 'दफ्तर', 'transliteration' => 'Daftar', 'category' => 'Work'],
-        ['word' => 'Car', 'hindi' => 'गाड़ी', 'transliteration' => 'Gaadi', 'category' => 'Transport'],
-        ['word' => 'Train', 'hindi' => 'रेलगाड़ी', 'transliteration' => 'Relgaadi', 'category' => 'Transport'],
-        ['word' => 'Bus', 'hindi' => 'बस', 'transliteration' => 'Bus', 'category' => 'Transport'],
-        ['word' => 'Road', 'hindi' => 'सड़क', 'transliteration' => 'Sadak', 'category' => 'Transport'],
-        ['word' => 'Market', 'hindi' => 'बाज़ार', 'transliteration' => 'Bazaar', 'category' => 'Places'],
-        ['word' => 'Hospital', 'hindi' => 'अस्पताल', 'transliteration' => 'Aspatal', 'category' => 'Places'],
-        ['word' => 'Temple', 'hindi' => 'मंदिर', 'transliteration' => 'Mandir', 'category' => 'Places'],
-        ['word' => 'City', 'hindi' => 'शहर', 'transliteration' => 'Shahar', 'category' => 'Places'],
-        ['word' => 'Village', 'hindi' => 'गाँव', 'transliteration' => 'Gaanv', 'category' => 'Places'],
-        ['word' => 'Country', 'hindi' => 'देश', 'transliteration' => 'Desh', 'category' => 'Places']
-    ];
+    public function words(Request $request)
+    {
+        $query = Words::query();
 
-    // Get unique categories for filtering
-    $categories = array_unique(array_column($words, 'category'));
-    sort($categories);
-    $page       = Page::where('slug', 'blog-listing')->first();
-    $setting    = WebSetting::first();
-    $words = Words::paginate(20);
-    $count = $words->count();
-    return view("frontend.words", compact('words', 'categories','words','count'));
-}
+        // Apply search filter
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('word', 'LIKE', "%{$search}%")
+                    // ->orWhere('meaning', 'LIKE', "%{$search}%")
+                    ->orWhere('meaning', 'LIKE', "%{$search}%")
+                    ->orWhere('pronunciation', 'LIKE', "%{$search}%");
+            });
+        }
 
-/*
+        // Apply alphabet filter
+        if ($request->filled('starts_with')) {
+            $letter = $request->get('starts_with');
+            $query->where('word', 'LIKE', $letter . '%');
+        }
+
+        // Apply sorting / filter by alphabet
+        $sort = $request->get('sort', 'alphabetical');
+
+        if ($sort === 'alphabetical') {
+            $query->orderBy('word', 'asc');
+        } elseif (strlen($sort) === 1 && ctype_alpha($sort)) {
+            // If a single alphabet is selected (A-Z)
+            $query->where('word', 'LIKE', $sort . '%')
+                ->orderBy('word', 'asc');
+        }
+
+        // Get paginated results
+        $words = $query->paginate(12)->appends($request->query());
+
+        // Get total count for statistics
+        $totalCount = Words::count();
+
+        return view("frontend.words", compact('words', 'totalCount'));
+    }
+
+
+    /*
 |--------------------------------------------------------------------------
 | Login
 |--------------------------------------------------------------------------
 */
-public function login()
-{
-    return view("frontend.login");
-}
+    public function login()
+    {
+        return view("frontend.login");
+    }
 
 
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Blog List
 |--------------------------------------------------------------------------
 */
 
-public function bloglist(Request $request, $categorySlug = null)
-{
-    $page       = Page::where('slug', 'blog-listing')->first();
-    $setting    = WebSetting::first();
-    $site_name  = config('seotools.opengraph.defaults.site_name', config('app.name'));
+    public function bloglist(Request $request, $categorySlug = null)
+    {
+        $page       = Page::where('slug', 'blog-listing')->first();
+        $setting    = WebSetting::first();
+        $site_name  = config('seotools.opengraph.defaults.site_name', config('app.name'));
 
-    // Blogs fetching
-    if ($categorySlug) {
-        $category = BlogCategory::where('slug', $categorySlug)
-            ->where('status', 1)
-            ->first();
-
-        if ($category) {
-            $blogs = BlogArticle::where('blog_category_id', $category->id)
+        // Blogs fetching
+        if ($categorySlug) {
+            $category = BlogCategory::where('slug', $categorySlug)
                 ->where('status', 1)
+                ->first();
+
+            if ($category) {
+                $blogs = BlogArticle::where('blog_category_id', $category->id)
+                    ->where('status', 1)
+                    ->orderBy('updated_at', 'desc') // newest first
+                    ->paginate(06);
+            } else {
+                $blogs = collect();
+            }
+        } else {
+            $blogs = BlogArticle::where('status', 1)
+                ->whereHas('category', function ($query) {
+                    $query->where('status', 1);
+                })
                 ->orderBy('updated_at', 'desc') // newest first
                 ->paginate(06);
-        } else {
-            $blogs = collect();
         }
-    } else {
-        $blogs = BlogArticle::where('status', 1)
-            ->whereHas('category', function ($query) {
-                $query->where('status', 1);
-            })
-            ->orderBy('updated_at', 'desc') // newest first
-            ->paginate(06);
-    }
 
-    // Attach instructor data
-    foreach ($blogs as $bc) {
-        $bc->instructor = User::find($bc->author_id);
-    }
+        // Attach instructor data
+        foreach ($blogs as $bc) {
+            $bc->instructor = User::find($bc->author_id);
+        }
 
-    // Sidebar data
-    $tags        = Tag::all();
-    $categories  = BlogCategory::orderby('views_count', 'desc')->take(7)->get();
-    $recentposts = BlogArticle::orderby('created_at', 'desc')->take(4)->get();
+        // Sidebar data
+        $tags        = Tag::all();
+        $categories  = BlogCategory::orderby('views_count', 'desc')->take(7)->get();
+        $recentposts = BlogArticle::orderby('created_at', 'desc')->take(4)->get();
 
-    // SEO Meta Info
-    $meta_title = $page->page_name ?? "Latest Blog Articles - EstateGuideBlog";
-    $meta_desc  = $page->meta_desc ?? "Browse fresh articles on real estate, finance, health, and more. Updated weekly on EstateGuideBlog.";
+        // SEO Meta Info
+        $meta_title = $page->page_name ?? "Latest Blog Articles - EstateGuideBlog";
+        $meta_desc  = $page->meta_desc ?? "Browse fresh articles on real estate, finance, health, and more. Updated weekly on EstateGuideBlog.";
 
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical(url()->current());
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical(url()->current());
 
-    // Open Graph
-    SEOTools::opengraph()->setTitle($meta_title);
-    SEOTools::opengraph()->setDescription($meta_desc);
-    SEOTools::opengraph()->setUrl(url()->current());
-    SEOTools::opengraph()->addImage(asset('storage/' . ($page->image ?? 'default.png')));
-    SEOTools::opengraph()->addProperty('type', 'website');
-    SEOTools::opengraph()->addProperty('site_name', 'EstateGuideBlog');
+        // Open Graph
+        SEOTools::opengraph()->setTitle($meta_title);
+        SEOTools::opengraph()->setDescription($meta_desc);
+        SEOTools::opengraph()->setUrl(url()->current());
+        SEOTools::opengraph()->addImage(asset('storage/' . ($page->image ?? 'default.png')));
+        SEOTools::opengraph()->addProperty('type', 'website');
+        SEOTools::opengraph()->addProperty('site_name', 'EstateGuideBlog');
 
-    // Twitter Card
-    SEOTools::twitter()->setTitle($meta_title);
-    SEOTools::twitter()->setDescription($meta_desc);
-    SEOTools::twitter()->setUrl(url()->current());
-    SEOTools::twitter()->setImage(asset('storage/' . ($page->image ?? 'default.png')));
-    SEOTools::twitter()->setSite('@YourTwitterHandle'); // Replace with real handle
-    SEOTools::twitter()->setType('summary_large_image');
+        // Twitter Card
+        SEOTools::twitter()->setTitle($meta_title);
+        SEOTools::twitter()->setDescription($meta_desc);
+        SEOTools::twitter()->setUrl(url()->current());
+        SEOTools::twitter()->setImage(asset('storage/' . ($page->image ?? 'default.png')));
+        SEOTools::twitter()->setSite('@YourTwitterHandle'); // Replace with real handle
+        SEOTools::twitter()->setType('summary_large_image');
 
-    // Schema: Blog List
-    $schema = [
-        "@context"        => "https://schema.org",
-        "@type"           => "ItemList",
-        "itemListOrder"   => "http://schema.org/ItemListOrderDescending",
-        "itemListElement" => []
-    ];
+        // Schema: Blog List
+        $schema = [
+            "@context"        => "https://schema.org",
+            "@type"           => "ItemList",
+            "itemListOrder"   => "http://schema.org/ItemListOrderDescending",
+            "itemListElement" => []
+        ];
 
-    foreach ($blogs as $index => $blog) {
-        $schema['itemListElement'][] = array_filter([
-            "@type"     => "ListItem",
-            "position"  => $index + 1,
-            "url"       => route('blogshow', $blog->slug),
-            "name"      => $blog->title,
-            "description" => $blog->meta_desc ?? $blog->excerpt,
-            "image"     => $blog->image ? asset('storage/' . $blog->image) : null,
-            "item"      => [
-                "@type"        => "Article",
-                "headline"     => $blog->title,
-                "description"  => $blog->meta_desc ?? $blog->excerpt,
-                "datePublished"=> $blog->created_at->toIso8601String(),
-                "author"       => [
-                    "@type" => "Person",
-                    "name"  => $blog->instructor->name ?? "Admin"
+        foreach ($blogs as $index => $blog) {
+            $schema['itemListElement'][] = array_filter([
+                "@type"     => "ListItem",
+                "position"  => $index + 1,
+                "url"       => route('blogshow', $blog->slug),
+                "name"      => $blog->title,
+                "description" => $blog->meta_desc ?? $blog->excerpt,
+                "image"     => $blog->image ? asset('storage/' . $blog->image) : null,
+                "item"      => [
+                    "@type"        => "Article",
+                    "headline"     => $blog->title,
+                    "description"  => $blog->meta_desc ?? $blog->excerpt,
+                    "datePublished" => $blog->created_at->toIso8601String(),
+                    "author"       => [
+                        "@type" => "Person",
+                        "name"  => $blog->instructor->name ?? "Admin"
+                    ]
+                ]
+            ]);
+        }
+
+        // ✅ Add mainEntity here
+        $schema['mainEntity'] = [
+            "@type"         => "ItemList",
+            "itemListOrder" => "http://schema.org/ItemListOrderDescending",
+            "numberOfItems" => $blogs->count(),
+        ];
+
+        // Encode schema to JSON
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        // Schema: Breadcrumbs
+        $breadcrumbs = [
+            "@context"        => "https://schema.org",
+            "@type"           => "BreadcrumbList",
+            "itemListElement" => [
+                [
+                    "@type"    => "ListItem",
+                    "position" => 1,
+                    "name"     => "Home",
+                    "item"     => route('home')
+                ],
+                [
+                    "@type"    => "ListItem",
+                    "position" => 2,
+                    "name"     => "Blog",
+                    "item"     => route('bloglist')
                 ]
             ]
-        ]);
-    }
-
-    // ✅ Add mainEntity here
-    $schema['mainEntity'] = [
-        "@type"         => "ItemList",
-        "itemListOrder" => "http://schema.org/ItemListOrderDescending",
-        "numberOfItems" => $blogs->count(),
-    ];
-
-    // Encode schema to JSON
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    // Schema: Breadcrumbs
-    $breadcrumbs = [
-        "@context"        => "https://schema.org",
-        "@type"           => "BreadcrumbList",
-        "itemListElement" => [
-            [
-                "@type"    => "ListItem",
-                "position" => 1,
-                "name"     => "Home",
-                "item"     => route('home')
-            ],
-            [
-                "@type"    => "ListItem",
-                "position" => 2,
-                "name"     => "Blog",
-                "item"     => route('bloglist')
-            ]
-        ]
-    ];
-
-    if ($categorySlug && isset($category)) {
-        $breadcrumbs['itemListElement'][] = [
-            "@type"    => "ListItem",
-            "position" => 3,
-            "name"     => $category->title,
-            "item"     => route('bloglist', $category->slug)
         ];
+
+        if ($categorySlug && isset($category)) {
+            $breadcrumbs['itemListElement'][] = [
+                "@type"    => "ListItem",
+                "position" => 3,
+                "name"     => $category->title,
+                "item"     => route('bloglist', $category->slug)
+            ];
+        }
+
+        $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        return view("frontend.blog-listing", compact(
+            'page',
+            'setting',
+            'blogs',
+            'categories',
+            'recentposts',
+            'tags',
+            'schemaMarkup',
+            'breadcrumbsMarkup'
+        ));
     }
 
-    $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    return view("frontend.blog-listing", compact(
-        'page',
-        'setting',
-        'blogs',
-        'categories',
-        'recentposts',
-        'tags',
-        'schemaMarkup',
-        'breadcrumbsMarkup'
-    ));
-}
-
-/*
+    /*
 |--------------------------------------------------------------------------
 | Blog Show
 |--------------------------------------------------------------------------
 */
 
-public function blogshow(BlogArticle $articleArticle, $slug)
-{
-    $setting = WebSetting::first();
-    $article = BlogArticle::where('slug', $slug)->firstOrFail();
+    public function blogshow(BlogArticle $articleArticle, $slug)
+    {
+        $setting = WebSetting::first();
+        $article = BlogArticle::where('slug', $slug)->firstOrFail();
 
-    $page = ['page_name' => $article->page_title];
-    $meta_title = $article->title ?? "Welcome to Our Main article";
-    $meta_desc = $article->meta_desc ?? "Description of the main article";
-    $instructor = User::find($article->author_id);
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $tags = Tag::all();
-    $categories = BlogCategory::orderby('views_count', 'desc')->where('status','1')->take(7)->get();
-    $recentposts = BlogArticle::orderby('updated_at', 'desc')->where('status','1')->take(4)->get();
+        $page = ['page_name' => $article->page_title];
+        $meta_title = $article->title ?? "Welcome to Our Main article";
+        $meta_desc = $article->meta_desc ?? "Description of the main article";
+        $instructor = User::find($article->author_id);
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $tags = Tag::all();
+        $categories = BlogCategory::orderby('views_count', 'desc')->where('status', '1')->take(7)->get();
+        $recentposts = BlogArticle::orderby('updated_at', 'desc')->where('status', '1')->take(4)->get();
 
-    // $comments = $article->comments()
-    //     ->whereNull('parent_id')
-    //     ->where('is_approved', true)
-    //     ->with(['replies' => function ($query) {
-    //         $query->where('is_approved', true);
-    //     }])
-    //     ->get();
+        // $comments = $article->comments()
+        //     ->whereNull('parent_id')
+        //     ->where('is_approved', true)
+        //     ->with(['replies' => function ($query) {
+        //         $query->where('is_approved', true);
+        //     }])
+        //     ->get();
 
-    $popularposts = BlogArticle::with('category')->where('status', '1')
-        ->where('id', '!=', $article->id)
-        ->orderBy('views_count', 'desc')
-        ->take(3)
-        ->get();
+        $popularposts = BlogArticle::with('category')->where('status', '1')
+            ->where('id', '!=', $article->id)
+            ->orderBy('views_count', 'desc')
+            ->take(3)
+            ->get();
 
-    // ------------------------------
-    // ✅ SEO Meta and Open Graph
-    // ------------------------------
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical(url()->current());
+        // ------------------------------
+        // ✅ SEO Meta and Open Graph
+        // ------------------------------
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical(url()->current());
 
-    SEOTools::opengraph()->setTitle($meta_title);
-    SEOTools::opengraph()->setDescription($meta_desc);
-    SEOTools::opengraph()->setUrl(url()->current());
-    SEOTools::opengraph()->addProperty('type', 'article');
-    SEOTools::opengraph()->addImage(asset('storage/' . ($article->image ?? 'default.png')));
+        SEOTools::opengraph()->setTitle($meta_title);
+        SEOTools::opengraph()->setDescription($meta_desc);
+        SEOTools::opengraph()->setUrl(url()->current());
+        SEOTools::opengraph()->addProperty('type', 'article');
+        SEOTools::opengraph()->addImage(asset('storage/' . ($article->image ?? 'default.png')));
 
-    SEOTools::twitter()->setTitle($meta_title);
-    SEOTools::twitter()->setDescription($meta_desc);
-    SEOTools::twitter()->setImage(asset('storage/' . ($article->image ?? 'default.png')));
-    SEOTools::twitter()->setUrl(url()->current());
-    SEOTools::twitter()->setSite('@YourTwitterHandle'); // Replace with real handle
-    SEOTools::twitter()->setType('summary_large_image');
+        SEOTools::twitter()->setTitle($meta_title);
+        SEOTools::twitter()->setDescription($meta_desc);
+        SEOTools::twitter()->setImage(asset('storage/' . ($article->image ?? 'default.png')));
+        SEOTools::twitter()->setUrl(url()->current());
+        SEOTools::twitter()->setSite('@YourTwitterHandle'); // Replace with real handle
+        SEOTools::twitter()->setType('summary_large_image');
 
-    // ------------------------------
-    // ✅ Article Schema JSON-LD
-    // ------------------------------
-    $schemaData = [
-        "@context" => "https://schema.org",
-        "@type" => "NewsArticle", // ✅ More specific than Article
-        "headline" => $article->title,
-        "description" => $meta_desc,
-        "mainEntityOfPage" => [
-            "@type" => "WebPage",
-            "@id" => url()->current()
-        ],
-        "url" => url()->current(),
-        "image" => asset('storage/' . ($article->image ?? 'default.png')),
-        "datePublished" => $article->created_at->toIso8601String(),
-        "dateModified" => $article->updated_at->toIso8601String(),
-        "articleBody" => strip_tags($article->description), // ✅ Add full body text
-        "author" => [
-            "@type" => "Person",
-            "name" => $instructor->name ?? 'Admin',
-            // "sameAs" => [
-            //     $instructor->twitter ? "https://twitter.com/{$instructor->twitter}" : null,
-            //     $instructor->insta ? "https://instagram.com/{$instructor->insta}" : null,
-            //     // Add more social links if available
-            // ]
-        ],
-        "publisher" => [
-            "@type" => "Organization",
-            "@id" => route('home') . '#organization', // ✅ Added @id
-            "name" => $site_name,
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => asset('storage/settings/' . ($setting->site_logo ?? 'default.png'))
-            ]
-        ],
-        "articleSection" => $article->category->name ?? "Blog",
-    ];
-
-    // Remove null values (for example, missing social URLs)
-    // $schemaData['author']['sameAs'] = array_values(array_filter($schemaData['author']['sameAs']));
-
-    $schemaMarkup = json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    // ------------------------------
-    // ✅ Breadcrumb Schema JSON-LD
-    // ------------------------------
-    $breadcrumbs = [
-        "@context" => "https://schema.org",
-        "@type" => "BreadcrumbList",
-        "itemListElement" => [
-            [
-                "@type" => "ListItem",
-                "position" => 1,
-                "name" => "Home",
-                "item" => route('home')
+        // ------------------------------
+        // ✅ Article Schema JSON-LD
+        // ------------------------------
+        $schemaData = [
+            "@context" => "https://schema.org",
+            "@type" => "NewsArticle", // ✅ More specific than Article
+            "headline" => $article->title,
+            "description" => $meta_desc,
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => url()->current()
             ],
-            [
-                "@type" => "ListItem",
-                "position" => 2,
-                "name" => "Blog",
-                "item" => route('bloglist')
+            "url" => url()->current(),
+            "image" => asset('storage/' . ($article->image ?? 'default.png')),
+            "datePublished" => $article->created_at->toIso8601String(),
+            "dateModified" => $article->updated_at->toIso8601String(),
+            "articleBody" => strip_tags($article->description), // ✅ Add full body text
+            "author" => [
+                "@type" => "Person",
+                "name" => $instructor->name ?? 'Admin',
+                // "sameAs" => [
+                //     $instructor->twitter ? "https://twitter.com/{$instructor->twitter}" : null,
+                //     $instructor->insta ? "https://instagram.com/{$instructor->insta}" : null,
+                //     // Add more social links if available
+                // ]
             ],
-            [
-                "@type" => "ListItem",
-                "position" => 3,
-                "name" => $article->title,
-                "item" => url()->current()
+            "publisher" => [
+                "@type" => "Organization",
+                "@id" => route('home') . '#organization', // ✅ Added @id
+                "name" => $site_name,
+                "logo" => [
+                    "@type" => "ImageObject",
+                    "url" => asset('storage/settings/' . ($setting->site_logo ?? 'default.png'))
+                ]
+            ],
+            "articleSection" => $article->category->name ?? "Blog",
+        ];
+
+        // Remove null values (for example, missing social URLs)
+        // $schemaData['author']['sameAs'] = array_values(array_filter($schemaData['author']['sameAs']));
+
+        $schemaMarkup = json_encode($schemaData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        // ------------------------------
+        // ✅ Breadcrumb Schema JSON-LD
+        // ------------------------------
+        $breadcrumbs = [
+            "@context" => "https://schema.org",
+            "@type" => "BreadcrumbList",
+            "itemListElement" => [
+                [
+                    "@type" => "ListItem",
+                    "position" => 1,
+                    "name" => "Home",
+                    "item" => route('home')
+                ],
+                [
+                    "@type" => "ListItem",
+                    "position" => 2,
+                    "name" => "Blog",
+                    "item" => route('bloglist')
+                ],
+                [
+                    "@type" => "ListItem",
+                    "position" => 3,
+                    "name" => $article->title,
+                    "item" => url()->current()
+                ]
             ]
-        ]
-    ];
+        ];
 
-    $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view("frontend.blog-details", compact(
-        'instructor',
-        'page',
-        'popularposts',
-        'setting',
-        'article',
-        'tags',
-        'categories',
-        'recentposts',
-        // 'comments',
-        'schemaMarkup',
-        'breadcrumbsMarkup'
-    ));
-}
+        return view("frontend.blog-details", compact(
+            'instructor',
+            'page',
+            'popularposts',
+            'setting',
+            'article',
+            'tags',
+            'categories',
+            'recentposts',
+            // 'comments',
+            'schemaMarkup',
+            'breadcrumbsMarkup'
+        ));
+    }
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Contact Us
 |--------------------------------------------------------------------------
 */
 
-public function contact()
-{
-    $page = Page::where('slug', 'contact-us')->firstOrFail();
-    $setting = WebSetting::first();
-    $faq= Faqs::take(4)->get();
+    public function contact()
+    {
+        $page = Page::where('slug', 'contact-us')->firstOrFail();
+        $setting = WebSetting::first();
+        $faq = Faqs::take(4)->get();
 
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $meta_title = $page->page_name ?? "$site_name - Contact Us";
-    $meta_desc = $page->meta_desc ?? "Get in touch with $site_name for inquiries, support, or collaborations.";
-    $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
-    $current_url = url()->current();
-    $twitter_handle = '@EstateGuideBlog'; // ✅ Update with your real handle or leave empty if you don’t have
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $meta_title = $page->page_name ?? "$site_name - Contact Us";
+        $meta_desc = $page->meta_desc ?? "Get in touch with $site_name for inquiries, support, or collaborations.";
+        $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
+        $current_url = url()->current();
+        $twitter_handle = '@EstateGuideBlog'; // ✅ Update with your real handle or leave empty if you don’t have
 
-    // === SEO Meta Tags ===
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical($current_url);
+        // === SEO Meta Tags ===
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical($current_url);
 
-    // === OpenGraph Tags ===
-    SEOTools::opengraph()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->addImage([
-            'url' => $meta_image,
-            'width' => 300,
-            'height' => 80
-        ])
-        ->setSiteName($site_name)
-        ->addProperty('type', 'website'); // ✅ Use 'website' for Contact page
+        // === OpenGraph Tags ===
+        SEOTools::opengraph()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->addImage([
+                'url' => $meta_image,
+                'width' => 300,
+                'height' => 80
+            ])
+            ->setSiteName($site_name)
+            ->addProperty('type', 'website'); // ✅ Use 'website' for Contact page
 
-    // === Twitter Tags ===
-    SEOTools::twitter()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->setImage($meta_image)
-        ->setSite($twitter_handle);
+        // === Twitter Tags ===
+        SEOTools::twitter()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->setImage($meta_image)
+            ->setSite($twitter_handle);
 
-    // === JSON-LD Schema.org Markup ===
-    $schema = [
-        "@context" => "https://schema.org",
-        "@type" => "ContactPage",
-        "name" => $meta_title,
-        "description" => $meta_desc,
-        "url" => $current_url,
-        "inLanguage" => "en-US",
-        "dateModified" => now()->toIso8601String(),
-        "mainEntityOfPage" => [
-            "@type" => "WebPage",
-            "@id" => $current_url
-        ],
-        "publisher" => [
-            "@type" => "Organization",
-            "name" => $site_name,
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => $meta_image,
-                "width" => 300,
-                "height" => 80
-            ]
-        ],
-        // ✅ This is your contact form schema
-        "potentialAction" => [
-            "@type" => "CommunicateAction",
-            "name" => "Contact Form Submission",
-            "target" => [
-                "@type" => "EntryPoint",
-                "urlTemplate" => $current_url . "#contact-form", // adjust ID if needed
-                "inLanguage" => "en-US",
-                "actionPlatform" => [
-                    "http://schema.org/DesktopWebPlatform",
-                    "http://schema.org/MobileWebPlatform"
+        // === JSON-LD Schema.org Markup ===
+        $schema = [
+            "@context" => "https://schema.org",
+            "@type" => "ContactPage",
+            "name" => $meta_title,
+            "description" => $meta_desc,
+            "url" => $current_url,
+            "inLanguage" => "en-US",
+            "dateModified" => now()->toIso8601String(),
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => $current_url
+            ],
+            "publisher" => [
+                "@type" => "Organization",
+                "name" => $site_name,
+                "logo" => [
+                    "@type" => "ImageObject",
+                    "url" => $meta_image,
+                    "width" => 300,
+                    "height" => 80
+                ]
+            ],
+            // ✅ This is your contact form schema
+            "potentialAction" => [
+                "@type" => "CommunicateAction",
+                "name" => "Contact Form Submission",
+                "target" => [
+                    "@type" => "EntryPoint",
+                    "urlTemplate" => $current_url . "#contact-form", // adjust ID if needed
+                    "inLanguage" => "en-US",
+                    "actionPlatform" => [
+                        "http://schema.org/DesktopWebPlatform",
+                        "http://schema.org/MobileWebPlatform"
+                    ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.contact-us', compact('page', 'setting', 'schemaMarkup','faq'));
-}
+        return view('frontend.contact-us', compact('page', 'setting', 'schemaMarkup', 'faq'));
+    }
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | About Us
 |--------------------------------------------------------------------------
 */
 
-public function about()
-{
+    public function about()
+    {
 
-    $page = Page::where('slug', 'about-us')->firstOrFail();
-    $setting = WebSetting::first();
+        $page = Page::where('slug', 'about-us')->firstOrFail();
+        $setting = WebSetting::first();
 
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $meta_title = $page->page_name ?? "$site_name - About Us";
-    $meta_desc = $page->meta_desc ?? "Learn more about $site_name — our mission, team, and values.";
-    $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
-    $current_url = url()->current();
-    // === SEO Meta Tags ===
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    // === OpenGraph Tags ===
-    SEOTools::opengraph()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->addImage($meta_image)
-        ->setSiteName($site_name)
-        ->addProperty('type', 'website'); // or "AboutPage" if more suitable
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $meta_title = $page->page_name ?? "$site_name - About Us";
+        $meta_desc = $page->meta_desc ?? "Learn more about $site_name — our mission, team, and values.";
+        $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
+        $current_url = url()->current();
+        // === SEO Meta Tags ===
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        // === OpenGraph Tags ===
+        SEOTools::opengraph()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->addImage($meta_image)
+            ->setSiteName($site_name)
+            ->addProperty('type', 'website'); // or "AboutPage" if more suitable
 
-    // === Twitter Cards ===
-    SEOTools::twitter()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->setImage($meta_image)
-        ->setSite('@' . str_replace(' ', '', $site_name)); // Make sure your brand has a real Twitter handle
+        // === Twitter Cards ===
+        SEOTools::twitter()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->setImage($meta_image)
+            ->setSite('@' . str_replace(' ', '', $site_name)); // Make sure your brand has a real Twitter handle
 
-    // === Schema.org JSON-LD (AboutPage) ===
-    $schema = [
-        "@context" => "https://schema.org",
-        "@type" => "AboutPage",
-        "name" => $meta_title,
-        "description" => $meta_desc,
-        "url" => $current_url,
-        "inLanguage" => "en-US",
-        "datePublished" => "2025-04-14T08:50:45+00:00", // Optional: Set if known
-        "dateModified" => now()->toIso8601String(), // dynamically sets modified date
-        "mainEntityOfPage" => [
-            "@type" => "WebPage",
-            "@id" => $current_url
-        ],
-        "publisher" => [
-            "@type" => "Organization",
-            "name" => $site_name,
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => $meta_image,
-                "width" => 300,
-                "height" => 80
+        // === Schema.org JSON-LD (AboutPage) ===
+        $schema = [
+            "@context" => "https://schema.org",
+            "@type" => "AboutPage",
+            "name" => $meta_title,
+            "description" => $meta_desc,
+            "url" => $current_url,
+            "inLanguage" => "en-US",
+            "datePublished" => "2025-04-14T08:50:45+00:00", // Optional: Set if known
+            "dateModified" => now()->toIso8601String(), // dynamically sets modified date
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => $current_url
+            ],
+            "publisher" => [
+                "@type" => "Organization",
+                "name" => $site_name,
+                "logo" => [
+                    "@type" => "ImageObject",
+                    "url" => $meta_image,
+                    "width" => 300,
+                    "height" => 80
+                ]
             ]
-        ]
-    ];
+        ];
 
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.about-us', compact('page', 'setting', 'schemaMarkup'));
-}
+        return view('frontend.about-us', compact('page', 'setting', 'schemaMarkup'));
+    }
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Terms Conditions
 |--------------------------------------------------------------------------
 */
 
-public function termsconditions(Request $request)
-{
-    $page = Page::where('slug', 'terms-and-conditions')->first();
-    $setting = WebSetting::first();
+    public function termsconditions(Request $request)
+    {
+        $page = Page::where('slug', 'terms-and-conditions')->first();
+        $setting = WebSetting::first();
 
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $meta_title = $page->page_name ?? "$site_name - Terms & Conditions";
-    $meta_desc = $page->meta_desc ?? "Review the terms and conditions of using $site_name, including user obligations and legal rights.";
-    $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
-    $twitter_handle = $setting->site_twitter ?? '@YourSiteHandle'; // <- Adjust manually
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $meta_title = $page->page_name ?? "$site_name - Terms & Conditions";
+        $meta_desc = $page->meta_desc ?? "Review the terms and conditions of using $site_name, including user obligations and legal rights.";
+        $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
+        $twitter_handle = $setting->site_twitter ?? '@YourSiteHandle'; // <- Adjust manually
 
-    // === SEO Meta Tags ===
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical(url()->current());
-    // === OpenGraph Meta ===
-    SEOTools::opengraph()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl(url()->current())
-        ->setType('website')
-        ->addImage($meta_image)
-        ->setSiteName($site_name);
+        // === SEO Meta Tags ===
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical(url()->current());
+        // === OpenGraph Meta ===
+        SEOTools::opengraph()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl(url()->current())
+            ->setType('website')
+            ->addImage($meta_image)
+            ->setSiteName($site_name);
 
-    // === Twitter Cards ===
-    SEOTools::twitter()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl(url()->current())
-        ->setImage($meta_image)
-        ->setSite($twitter_handle);
+        // === Twitter Cards ===
+        SEOTools::twitter()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl(url()->current())
+            ->setImage($meta_image)
+            ->setSite($twitter_handle);
 
-    // === Schema.org WebPage (Main) ===
-    $schema = [
-        "@context" => "https://schema.org",
-        "@type" => "WebPage",
-        "name" => $meta_title,
-        "description" => $meta_desc,
-        "url" => url()->current(),
-        "inLanguage" => "en-US",
-        "datePublished" => optional($page->created_at)->toIso8601String(),
-        "dateModified" => optional($page->updated_at)->toIso8601String(),
-        "mainEntityOfPage" => [
+        // === Schema.org WebPage (Main) ===
+        $schema = [
+            "@context" => "https://schema.org",
             "@type" => "WebPage",
-            "@id" => url()->current()
-        ]
-    ];
-
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    // === Schema.org WebPage (CreativeWork Extension) ===
-    $webPageSchema = [
-        "@context" => "https://schema.org",
-        "@type" => "CreativeWork",
-        "name" => "Terms and Conditions",
-        "description" => "This page explains the terms and conditions for using $site_name, including your rights and responsibilities.",
-        "inLanguage" => "en-US",
-        "url" => url()->current()
-    ];
-    $webPageSchemaMarkup = json_encode($webPageSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    // === Schema.org Organization Logo ===
-    $organizationSchema = [
-        "@context" => "https://schema.org",
-        "@type" => "Organization",
-        "name" => $site_name,
-        "url" => url('/'),
-        "logo" => [
-            "@type" => "ImageObject",
-            "url" => $meta_image,
-            "width" => 300,
-            "height" => 80
-        ]
-    ];
-    $organizationSchemaMarkup = json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
-    // === Schema.org BreadcrumbList ===
-    $breadcrumbs = [
-        "@context" => "https://schema.org",
-        "@type" => "BreadcrumbList",
-        "itemListElement" => [
-            [
-                "@type" => "ListItem",
-                "position" => 1,
-                "name" => "Home",
-                "item" => url('/')
-            ],
-            [
-                "@type" => "ListItem",
-                "position" => 2,
-                "name" => "Terms & Conditions",
-                "item" => url()->current()
+            "name" => $meta_title,
+            "description" => $meta_desc,
+            "url" => url()->current(),
+            "inLanguage" => "en-US",
+            "datePublished" => optional($page->created_at)->toIso8601String(),
+            "dateModified" => optional($page->updated_at)->toIso8601String(),
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => url()->current()
             ]
-        ]
-    ];
-    $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        ];
 
-    return view('frontend.terms-and-conditions', compact(
-        'page',
-        'setting',
-        'schemaMarkup',
-        'webPageSchemaMarkup',
-        'organizationSchemaMarkup',
-        'breadcrumbsMarkup'
-    ));
-}
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-/*
+        // === Schema.org WebPage (CreativeWork Extension) ===
+        $webPageSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "CreativeWork",
+            "name" => "Terms and Conditions",
+            "description" => "This page explains the terms and conditions for using $site_name, including your rights and responsibilities.",
+            "inLanguage" => "en-US",
+            "url" => url()->current()
+        ];
+        $webPageSchemaMarkup = json_encode($webPageSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        // === Schema.org Organization Logo ===
+        $organizationSchema = [
+            "@context" => "https://schema.org",
+            "@type" => "Organization",
+            "name" => $site_name,
+            "url" => url('/'),
+            "logo" => [
+                "@type" => "ImageObject",
+                "url" => $meta_image,
+                "width" => 300,
+                "height" => 80
+            ]
+        ];
+        $organizationSchemaMarkup = json_encode($organizationSchema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        // === Schema.org BreadcrumbList ===
+        $breadcrumbs = [
+            "@context" => "https://schema.org",
+            "@type" => "BreadcrumbList",
+            "itemListElement" => [
+                [
+                    "@type" => "ListItem",
+                    "position" => 1,
+                    "name" => "Home",
+                    "item" => url('/')
+                ],
+                [
+                    "@type" => "ListItem",
+                    "position" => 2,
+                    "name" => "Terms & Conditions",
+                    "item" => url()->current()
+                ]
+            ]
+        ];
+        $breadcrumbsMarkup = json_encode($breadcrumbs, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        return view('frontend.terms-and-conditions', compact(
+            'page',
+            'setting',
+            'schemaMarkup',
+            'webPageSchemaMarkup',
+            'organizationSchemaMarkup',
+            'breadcrumbsMarkup'
+        ));
+    }
+
+    /*
 |--------------------------------------------------------------------------
 | Privacy Policy
 |--------------------------------------------------------------------------
 */
 
-public function privacy(Request $request)
-{
-    $page = Page::where('slug', 'privacy-policy')->firstOrFail();
-    $setting = WebSetting::first();
+    public function privacy(Request $request)
+    {
+        $page = Page::where('slug', 'privacy-policy')->firstOrFail();
+        $setting = WebSetting::first();
 
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $meta_title = $page->page_name ?? "$site_name - Privacy Policy";
-    $meta_desc = $page->meta_desc ?? "Read the privacy policy of $site_name to understand how we collect, use, store, and protect your data.";
-    $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
-    $current_url = url()->current();
-    $twitter_handle = '@EstateGuideBlog'; // ✅ Replace with actual if available
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $meta_title = $page->page_name ?? "$site_name - Privacy Policy";
+        $meta_desc = $page->meta_desc ?? "Read the privacy policy of $site_name to understand how we collect, use, store, and protect your data.";
+        $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
+        $current_url = url()->current();
+        $twitter_handle = '@EstateGuideBlog'; // ✅ Replace with actual if available
 
-    // === SEO Meta Tags ===
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical($current_url);
+        // === SEO Meta Tags ===
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical($current_url);
 
-    // === OpenGraph Tags ===
-    SEOTools::opengraph()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->addImage([
-            'url' => $meta_image,
-            'width' => 300,
-            'height' => 80
-        ])
-        ->setSiteName($site_name)
-        ->addProperty('type', 'WebPage');
+        // === OpenGraph Tags ===
+        SEOTools::opengraph()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->addImage([
+                'url' => $meta_image,
+                'width' => 300,
+                'height' => 80
+            ])
+            ->setSiteName($site_name)
+            ->addProperty('type', 'WebPage');
 
-    // === Twitter Card Tags ===
-    SEOTools::twitter()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->setImage($meta_image)
-        ->setSite($twitter_handle);
+        // === Twitter Card Tags ===
+        SEOTools::twitter()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->setImage($meta_image)
+            ->setSite($twitter_handle);
 
-    // === JSON-LD Schema.org Markup ===
-    $schema = [
-        "@context" => "https://schema.org",
-        "@type" => "WebPage",
-        "name" => $meta_title,
-        "description" => $meta_desc,
-        "url" => $current_url,
-        "inLanguage" => "en-US",
-        "dateModified" => now()->toIso8601String(),
-        "mainEntity" => [
-            "@type" => "CreativeWork",
-            "name" => "Privacy Policy",
-            "description" => "This page outlines how $site_name collects, uses, stores, and protects user data in compliance with data protection laws."
-        ],
-        "mainEntityOfPage" => [
+        // === JSON-LD Schema.org Markup ===
+        $schema = [
+            "@context" => "https://schema.org",
             "@type" => "WebPage",
-            "@id" => $current_url
-        ],
-        "publisher" => [
-            "@type" => "Organization",
-            "name" => $site_name,
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => $meta_image,
-                "width" => 300,
-                "height" => 80
+            "name" => $meta_title,
+            "description" => $meta_desc,
+            "url" => $current_url,
+            "inLanguage" => "en-US",
+            "dateModified" => now()->toIso8601String(),
+            "mainEntity" => [
+                "@type" => "CreativeWork",
+                "name" => "Privacy Policy",
+                "description" => "This page outlines how $site_name collects, uses, stores, and protects user data in compliance with data protection laws."
+            ],
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => $current_url
+            ],
+            "publisher" => [
+                "@type" => "Organization",
+                "name" => $site_name,
+                "logo" => [
+                    "@type" => "ImageObject",
+                    "url" => $meta_image,
+                    "width" => 300,
+                    "height" => 80
+                ]
             ]
-        ]
-    ];
+        ];
 
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.privacy-policy', compact('page', 'setting', 'schemaMarkup'));
-}
+        return view('frontend.privacy-policy', compact('page', 'setting', 'schemaMarkup'));
+    }
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Disclaimer
 |--------------------------------------------------------------------------
 */
 
-public function disclaimer()
-{
-    $page = Page::where('slug', 'disclaimer')->firstOrFail();
-    $setting = WebSetting::first();
+    public function disclaimer()
+    {
+        $page = Page::where('slug', 'disclaimer')->firstOrFail();
+        $setting = WebSetting::first();
 
-    $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
-    $meta_title = $page->page_name ?? "$site_name - Disclaimer";
-    $meta_desc = $page->meta_desc ?? "Read the disclaimer of $site_name covering content usage, accuracy, and liability limits.";
-    $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
-    $current_url = url()->current();
+        $site_name = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $meta_title = $page->page_name ?? "$site_name - Disclaimer";
+        $meta_desc = $page->meta_desc ?? "Read the disclaimer of $site_name covering content usage, accuracy, and liability limits.";
+        $meta_image = asset('storage/settings/' . ($setting->site_logo ?? 'logo.png'));
+        $current_url = url()->current();
 
-    // === SEO Meta Tags ===
-    // SEOTools::setTitle($meta_title);
-    SEOTools::setDescription($meta_desc);
-    SEOTools::setCanonical($current_url);
+        // === SEO Meta Tags ===
+        // SEOTools::setTitle($meta_title);
+        SEOTools::setDescription($meta_desc);
+        SEOTools::setCanonical($current_url);
 
-    // === Open Graph ===
-    SEOTools::opengraph()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->addImage($meta_image)
-        ->setSiteName($site_name)
-        ->addProperty('type', 'WebPage');
+        // === Open Graph ===
+        SEOTools::opengraph()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->addImage($meta_image)
+            ->setSiteName($site_name)
+            ->addProperty('type', 'WebPage');
 
-    // === Twitter Card ===
-    SEOTools::twitter()
-        ->setTitle($meta_title)
-        ->setDescription($meta_desc)
-        ->setUrl($current_url)
-        ->setImage($meta_image)
-        ->setSite('@' . preg_replace('/\s+/', '', $site_name));
+        // === Twitter Card ===
+        SEOTools::twitter()
+            ->setTitle($meta_title)
+            ->setDescription($meta_desc)
+            ->setUrl($current_url)
+            ->setImage($meta_image)
+            ->setSite('@' . preg_replace('/\s+/', '', $site_name));
 
-    // === JSON-LD Schema ===
-    $schema = [
-        "@context" => "https://schema.org",
-        "@type" => "WebPage",
-        "name" => $meta_title,
-        "description" => $meta_desc,
-        "url" => $current_url,
-        "inLanguage" => "en-US",
-        "datePublished" => optional($page->created_at)->toIso8601String(),
-        "dateModified" => optional($page->updated_at)->toIso8601String(),
-        "mainEntityOfPage" => [
+        // === JSON-LD Schema ===
+        $schema = [
+            "@context" => "https://schema.org",
             "@type" => "WebPage",
-            "@id" => $current_url
-        ],
-        "about" => [
-            "@type" => "Thing",
-            "name" => "Website Disclaimer Policy"
-        ],
-        "publisher" => [
-            "@type" => "Organization",
-            "name" => $site_name,
-            "logo" => [
-                "@type" => "ImageObject",
-                "url" => $meta_image,
-                "width" => 300,
-                "height" => 80
+            "name" => $meta_title,
+            "description" => $meta_desc,
+            "url" => $current_url,
+            "inLanguage" => "en-US",
+            "datePublished" => optional($page->created_at)->toIso8601String(),
+            "dateModified" => optional($page->updated_at)->toIso8601String(),
+            "mainEntityOfPage" => [
+                "@type" => "WebPage",
+                "@id" => $current_url
+            ],
+            "about" => [
+                "@type" => "Thing",
+                "name" => "Website Disclaimer Policy"
+            ],
+            "publisher" => [
+                "@type" => "Organization",
+                "name" => $site_name,
+                "logo" => [
+                    "@type" => "ImageObject",
+                    "url" => $meta_image,
+                    "width" => 300,
+                    "height" => 80
+                ]
             ]
-        ]
-    ];
+        ];
 
-    $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        $schemaMarkup = json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
-    return view('frontend.disclaimer', compact('page', 'setting', 'schemaMarkup'));
-}
+        return view('frontend.disclaimer', compact('page', 'setting', 'schemaMarkup'));
+    }
 
-/*
+    /*
 |--------------------------------------------------------------------------
 | Error 404
 |--------------------------------------------------------------------------
 */
 
-public function error(Request $request)
-{
-    $page = Page::where('slug', '404')->first();
-    $setting = WebSetting::first();
-    return view('frontend.404', compact('page', 'setting'));
-}
-
+    public function error(Request $request)
+    {
+        $page = Page::where('slug', '404')->first();
+        $setting = WebSetting::first();
+        return view('frontend.404', compact('page', 'setting'));
+    }
 }

@@ -6,14 +6,14 @@
                     <i class="fas fa-book-open mr-2"></i>HindiLingo
                 </h3>
                 <p class="mb-4">The most comprehensive English to Hindi dictionary with advanced features for learners.</p>
-                <div class="flex space-x-3">
+                {{-- <div class="flex space-x-3">
                     <div class="bg-white p-2 rounded-lg shadow-sm">
                         <i class="fab fa-apple text-2xl"></i>
                     </div>
                     <div class="bg-white p-2 rounded-lg shadow-sm">
                         <i class="fab fa-google-play text-xl"></i>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             <div>
@@ -41,20 +41,16 @@
             <div>
                 <h4 class="font-semibold mb-4">Connect With Us</h4>
                 <div class="flex space-x-4 mb-6">
-                    <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
+                    <a href="{{$webSettings->site_fb}}" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
                         <i class="fab fa-facebook-f text-primary-600"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
+                    <a href="{{$webSettings->site_twitter}}" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
                         <i class="fab fa-twitter text-primary-600"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
+                    <a href="{{$webSettings->site_instagram}}" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
                         <i class="fab fa-instagram text-primary-600"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-primary-50 transition-all duration-200 shadow-sm">
-                        <i class="fab fa-youtube text-primary-600"></i>
-                    </a>
                 </div>
-
                 <div class="mt-6">
                     <p class="mb-2">Subscribe to our newsletter</p>
                     <div class="flex mt-2">
@@ -66,12 +62,10 @@
                 </div>
             </div>
         </div>
-
         <div class="border-t border-slate-200 mt-8 pt-6 text-center text-sm">
-            <p>© 2023 HindiLingo. All rights reserved.</p>
+            <p>{{$webSettings->theme_footer}}</p>
         </div>
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         // Simple JavaScript for interactive elements
