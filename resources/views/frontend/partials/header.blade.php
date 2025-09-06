@@ -4,7 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HindiLingo - English to Hindi Dictionary</title>
+    <title>@isset($page){{ $page['page_name'] }}@endisset</title>
+    {!! SEOMeta::generate() !!}
+    {!! OpenGraph::generate() !!}
+    {!! Twitter::generate() !!}
+
+    @if (!empty($schemaMarkup))
+        <script type="application/ld+json">
+            {!! $schemaMarkup !!}
+        </script>
+    @endif
+
+    @if (!empty($breadcrumbsMarkup))
+        <script type="application/ld+json">
+            {!! $breadcrumbsMarkup !!}
+        </script>
+    @endif
+
+    @if (!empty($courseSchemaMarkup))
+        <script type="application/ld+json">
+            {!! $courseSchemaMarkup !!}
+        </script>
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>

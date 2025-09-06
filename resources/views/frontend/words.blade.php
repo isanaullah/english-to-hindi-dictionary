@@ -8,7 +8,7 @@
             <i class="fas fa-book mr-3"></i>Dictionary Words
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Explore our comprehensive collection of English to Hindi translations with pronunciations and categories
+            {{$page->meta_desc}}
         </p>
     </div>
 

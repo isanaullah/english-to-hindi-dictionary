@@ -7,8 +7,8 @@
                 <span class="dark-text">Important information</span>
             </div>
 
-            <h1 class="text-4xl md:text-6xl font-bold dark-text mb-6"><span class="accent-gradient-text">Disclaimer</span></h1>
-            <p class="text-xl light-text mb-10 max-w-3xl">Please read this disclaimer carefully before using HindiLingo services.</p>
+            <h1 class="text-4xl md:text-6xl font-bold dark-text mb-6"><span class="accent-gradient-text">{{$page->title}}</span></h1>
+            <p class="text-xl light-text mb-10 max-w-3xl">{{$page->meta_desc}}</p>
         </section>
 
         <!-- Disclaimer Content -->

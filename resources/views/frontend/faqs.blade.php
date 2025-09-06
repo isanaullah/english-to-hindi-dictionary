@@ -15,8 +15,8 @@
                 <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <i class="fas fa-question-circle text-3xl text-primary-600"></i>
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold dark-text mb-6">Frequently Asked Questions</h1>
-                <p class="text-xl light-text leading-relaxed">Find answers to common questions about our English-to-Hindi dictionary, learning features, and how to make the most of your language learning journey.</p>
+                <h1 class="text-4xl md:text-5xl font-bold dark-text mb-6">{{$page->title}}</h1>
+                <p class="text-xl light-text leading-relaxed">{{$page->meta_desc}}</p>
             </div>
         </section>
 
@@ -86,9 +86,12 @@
                         <a href="{{route('contact-us')}}" class="bg-primary-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-600 transition-all duration-300 inline-flex items-center justify-center">
                             <i class="fas fa-envelope mr-2"></i>Contact Support
                         </a>
-                        <a href="#" class="bg-slate-100 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-200 transition-all duration-300 inline-flex items-center justify-center">
-                            <i class="fab fa-whatsapp mr-2"></i>WhatsApp Chat
+                        <a href="https://wa.me/{{ preg_replace('/\D/', '', $setting->site_phone) }}"
+                        target="_blank"
+                        class="bg-slate-100 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-200 transition-all duration-300 inline-flex items-center justify-center">
+                            <i class="fab fa-whatsapp mr-2"></i> WhatsApp Chat
                         </a>
+
                     </div>
                 </div>
             </div>

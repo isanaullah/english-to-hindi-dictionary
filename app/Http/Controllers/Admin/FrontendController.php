@@ -59,7 +59,7 @@ class FrontendController extends Controller
 */
     public function faqs()
     {
-        $page = Page::where('slug', 'contact-us')->firstOrFail();
+        $page = Page::where('slug', 'faqs')->firstOrFail();
         $setting = WebSetting::first();
         $faqs = Faqs::take(4)->get();
         return view("frontend.faqs", compact('page', 'setting', 'faqs'));
@@ -79,8 +79,11 @@ public function worddetail($slug)
     // Case-insensitive match
     $words = Words::whereRaw('LOWER(word) = ?', [strtolower($cleanWord)])
                   ->firstOrFail();
+    $homePage = Page::where('slug', 'home')->first();
 
-    $page = Page::where('slug', 'contact-us')->firstOrFail();
+    $page = [
+        'page_name' => $words->word . ' Meaning in Hindi | ' . ($homePage ? $homePage->page_name : 'Dictionary')
+    ];
     $setting = WebSetting::first();
 
     $wordLength = strlen(str_replace(' ', '', $words->word));
@@ -128,6 +131,8 @@ public function worddetail($slug)
 */
     public function words(Request $request)
     {
+        $page = Page::where('slug', 'words')->firstOrFail();
+        $setting = WebSetting::first();
         $query = Words::query();
 
         // Apply search filter
@@ -164,7 +169,7 @@ public function worddetail($slug)
         // Get total count for statistics
         $totalCount = Words::count();
 
-        return view("frontend.words", compact('words', 'totalCount'));
+        return view("frontend.words", compact('page','setting','words', 'totalCount'));
     }
 
 

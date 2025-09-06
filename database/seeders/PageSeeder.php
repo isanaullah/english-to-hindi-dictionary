@@ -103,6 +103,30 @@ class PageSeeder extends Seeder
                 'page_desc' => 'This page displays a list of all blog posts.',
                 'status' => 1,
             ],
+            [
+                'title' => 'Disclaimer',
+                'slug' => 'disclaimer',
+                'meta_desc' => 'Browse through a list of all blog posts.',
+                'page_name' => 'Disclaimer',
+                'page_desc' => 'This page displays a list of all blog posts.',
+                'status' => 1,
+            ],
+            [
+                'title' => 'Frequently Ask Questions',
+                'slug' => 'faqs',
+                'meta_desc' => 'Browse through a list of all blog posts.',
+                'page_name' => 'Frequently Ask Questions',
+                'page_desc' => 'This page displays a list of all blog posts.',
+                'status' => 1,
+            ],
+            [
+                'title' => 'Words',
+                'slug' => 'words',
+                'meta_desc' => 'Browse through a list of all blog posts.',
+                'page_name' => 'Words',
+                'page_desc' => 'This page displays a list of all blog posts.',
+                'status' => 1,
+            ],
         ];
 
         // Loop through the pages and insert them

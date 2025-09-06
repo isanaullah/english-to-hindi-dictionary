@@ -5,7 +5,7 @@
                 <h3 class="text-xl font-bold gradient-text mb-4 flex items-center">
                     <i class="fas fa-book-open mr-2"></i>HindiLingo
                 </h3>
-                <p class="mb-4">The most comprehensive English to Hindi dictionary with advanced features for learners.</p>
+                <p class="mb-4">{{$setting->meta_description}}</p>
                 {{-- <div class="flex space-x-3">
                     <div class="bg-white p-2 rounded-lg shadow-sm">
                         <i class="fab fa-apple text-2xl"></i>

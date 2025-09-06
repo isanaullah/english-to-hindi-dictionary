@@ -7,8 +7,8 @@
                 <span class="dark-text">Learn more about our mission</span>
             </div>
 
-            <h1 class="text-4xl md:text-6xl font-bold dark-text mb-6">About <span class="accent-gradient-text">HindiLingo</span></h1>
-            <p class="text-xl light-text mb-10 max-w-3xl">We're passionate about breaking language barriers and making Hindi learning accessible to everyone around the world.</p>
+            <h1 class="text-4xl md:text-6xl font-bold dark-text mb-6">{{$page->title}} <span class="accent-gradient-text">{{$setting->site_title}}</span></h1>
+            <p class="text-xl light-text mb-10 max-w-3xl">{{$page->meta_desc}}</p>
         </section>
 
         <!-- Mission Section -->

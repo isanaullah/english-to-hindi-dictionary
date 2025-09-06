@@ -9,8 +9,7 @@
 
         <h1 class="text-4xl md:text-6xl font-bold dark-text mb-6">Find Any English Word's <span
                 class="accent-gradient-text">Hindi Meaning</span> Instantly</h1>
-        <p class="text-xl light-text mb-10 max-w-2xl">The most accurate and comprehensive English to Hindi dictionary
-            with pronunciation, examples, and more.</p>
+        <p class="text-xl light-text mb-10 max-w-2xl">{{$page->meta_desc}}</p>
 
         <div class="flex mb-6 rounded-xl overflow-hidden shadow-md">
             <div class="language-tab active py-3 px-6 bg-white font-semibold">English to Hindi</div>
