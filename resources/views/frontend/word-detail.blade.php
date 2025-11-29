@@ -7,7 +7,7 @@
             <i class="fas fa-chevron-right text-xs"></i>
             <a href="#" class="hover:text-primary-600 transition-colors duration-200">Dictionary</a>
             <i class="fas fa-chevron-right text-xs"></i>
-            <span class="dark-text">{{ $words->word }}</span>
+            <span class="dark-text">{{ $words->english_phrase }}</span>
         </div>
     </nav>
 
@@ -18,8 +18,8 @@
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                     <div class="flex-1">
                         <div class="flex items-center gap-4 mb-4">
-                            <h1 id="word-text" class="text-4xl md:text-5xl font-bold dark-text">{{ $words->word }}</h1>
-                            <button onclick="playPronunciation('{{ $words->word }}')"
+                            <h1 id="word-text" class="text-4xl md:text-5xl font-bold dark-text">{{ $words->english_phrase }}</h1>
+                            <button onclick="playPronunciation('{{ $words->english_phrase }}')"
                                 class="text-primary-600 hover:text-primary-700 transition-colors duration-200 p-2 rounded-lg hover:bg-primary-50">
                                 <i class="fas fa-volume-up text-2xl"></i>
                             </button>
@@ -82,11 +82,11 @@
                                     <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                                         <div>
                                             <span
-                                                class="text-2xl font-bold text-primary-600 hindi-font">{{ $words->meaning }}</span>
+                                                class="text-2xl font-bold text-primary-600 hindi-font">{{ $words->hindi_script }}</span>
                                             <span
-                                                class="text-sm text-slate-600 ml-2">({{ $words->pronunciation }})</span>
+                                                class="text-sm text-slate-600 ml-2">({{ $words->hindi_meaning }})</span>
                                         </div>
-                                        <button onclick="playPronunciation2('{{ $words->meaning }}')"
+                                        <button onclick="playPronunciation2('{{ $words->hindi_script }}')"
                                             class="text-primary-600 hover:text-primary-700 transition-colors duration-200 p-2 rounded-lg hover:bg-primary-50">
                                             <i class="fas fa-volume-up text-2xl"></i>
                                         </button>
@@ -187,51 +187,18 @@
                     <div class="glassmorphism p-6 rounded-2xl shadow-md">
                         <h2 class="text-2xl font-bold dark-text mb-6 section-title">Definitions</h2>
 
-                        <div class="space-y-6">
+                        <div class="space-y-4">
                             <div class="border-l-4 border-primary-500 pl-6">
                                 <div class="flex items-center gap-2 mb-2">
                                     <span
-                                        class="bg-primary-100 text-primary-800 px-2 py-1 rounded text-sm font-medium">1</span>
-                                    <span class="text-slate-600 text-sm">Adjective</span>
+                                        class="bg-primary-100 text-primary-800 px-2 py-1 rounded text-sm font-medium">Definition</span>
                                 </div>
-                                <p class="dark-text font-medium mb-2">Having qualities that give pleasure to the senses
-                                    or mind; attractive.</p>
-                                <p class="light-text text-sm mb-3"><strong>Hindi:</strong> <span
-                                        class="hindi-font">सुंदर, आकर्षक, मनोहर</span></p>
+                                <p class="dark-text font-medium mb-2">{{ $words->english_definition }}</p>
                                 <div class="bg-slate-50 p-4 rounded-lg">
-                                    <p class="text-sm light-text mb-1"><strong>Example:</strong></p>
-                                    <p class="dark-text">"She has a beautiful smile."</p>
-                                    <p class="text-primary-600 hindi-font mt-1">"उसकी मुस्कान सुंदर है।"</p>
+                                    <p class="text-sm light-text mb-1"><strong>Hindi Translation:</strong></p>
+                                    <p class="text-primary-600 hindi-font">{{ $words->hindi_script }}</p>
+                                    <p class="text-sm text-slate-600 mt-1"><strong>Roman Transliteration:</strong> {{ $words->hindi_meaning }}</p>
                                 </div>
-                            </div>
-
-                            <div class="border-l-4 border-accent-500 pl-6">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span
-                                        class="bg-accent-100 text-accent-800 px-2 py-1 rounded text-sm font-medium">2</span>
-                                    <span class="text-slate-600 text-sm">Adjective</span>
-                                </div>
-                                <p class="dark-text font-medium mb-2">Excellent; wonderful (used as a general term of
-                                    approval).</p>
-                                <p class="light-text text-sm mb-3"><strong>Hindi:</strong> <span
-                                        class="hindi-font">बेहतरीन, शानदार, उत्कृष्ट</span></p>
-                                <div class="bg-slate-50 p-4 rounded-lg">
-                                    <p class="text-sm light-text mb-1"><strong>Example:</strong></p>
-                                    <p class="dark-text">"That's a beautiful idea!"</p>
-                                    <p class="text-primary-600 hindi-font mt-1">"यह एक शानदार विचार है!"</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Usage Examples -->
-                    <div class="glassmorphism p-6 rounded-2xl shadow-md">
-                        <h2 class="text-2xl font-bold dark-text mb-6 section-title">Usage Examples</h2>
-
-                        <div class="space-y-4">
-                            <div class="p-4 bg-slate-50 rounded-lg border-l-4 border-primary-500">
-                                <p class="dark-text mb-2">"{{ $words->example }}"</p>
-                                {{-- <p class="text-primary-600 hindi-font text-sm">"सूर्यास्त बिल्कुल सुंदर था।"</p>
-                                    <span class="text-xs text-slate-500 mt-2 block">Context: Nature/Scenery</span> --}}
                             </div>
                         </div>
                     </div>
@@ -247,7 +214,7 @@
                             <!-- Word Length -->
                             <div class="flex justify-between items-center">
                                 <span class="light-text">Word Length</span>
-                                <span class="text-sm font-medium dark-text">{{ $wordLength }} letters</span>
+                                <span class="text-sm font-medium dark-text">{{ strlen(str_replace(' ', '', $words->english_phrase)) }} letters</span>
                             </div>
                         </div>
                     </div>
@@ -257,13 +224,13 @@
                         <h3 class="text-lg font-semibold dark-text mb-4">Related Words</h3>
                         <div class="space-y-3">
                             @foreach ($similarWords as $related)
-                                <a href="{{ route('worddetail', $related->slug) }}"
+                                <a href="#"
                                     class="block p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors duration-200">
                                     <div class="flex justify-between items-center">
-                                        <span class="font-medium dark-text">{{ $related->word }}</span>
+                                        <span class="font-medium dark-text">{{ $related->english_phrase }}</span>
                                     </div>
                                     <span
-                                        class="text-sm text-primary-600 hindi-font">{{ $related->meaning ?? '' }}</span>
+                                        class="text-sm text-primary-600 hindi-font">{{ $related->hindi_script ?? '' }}</span>
                                 </a>
                             @endforeach
                         </div>
@@ -277,10 +244,10 @@
                                 class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-calendar-day text-2xl text-accent-600"></i>
                             </div>
-                            <h4 class="font-bold dark-text mb-1">{{ $wordOfTheDay->word }}</h4>
-                            <p class="text-primary-600 hindi-font mb-2">{{ $wordOfTheDay->meaning }}</p>
-                            <p class="text-sm light-text">{{ $wordOfTheDay->pronunciation }}</p>
-                            <a href="{{ route('worddetail', $wordOfTheDay->slug) }}"
+                            <h4 class="font-bold dark-text mb-1">{{ $wordOfTheDay->english_phrase }}</h4>
+                            <p class="text-primary-600 hindi-font mb-2">{{ $wordOfTheDay->hindi_script }}</p>
+                            <p class="text-sm light-text">{{ $wordOfTheDay->hindi_meaning }}</p>
+                            <a href="#"
                                 class="text-primary-600 hover:text-primary-700 text-sm font-medium mt-2 inline-block">
                                 Learn More <i class="fas fa-arrow-right ml-1"></i>
                             </a>
@@ -301,8 +268,8 @@
                     <div class="glassmorphism p-6 rounded-2xl shadow-md word-card">
                         <!-- Word and pronunciation button -->
                         <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg font-bold dark-text">{{ $words->word }}</h3>
-                            <button onclick="playPronunciation('{{ $words->word }}')"
+                            <h3 class="text-lg font-bold dark-text">{{ $words->english_phrase }}</h3>
+                            <button onclick="playPronunciation('{{ $words->english_phrase }}')"
                                 class="flex items-center justify-center w-10 h-10 text-primary-600 hover:text-primary-700
                    bg-primary-50 hover:bg-primary-100 transition-colors duration-200 rounded-full shadow-sm">
                                 <i class="fas fa-volume-up text-xl"></i>
@@ -311,19 +278,19 @@
 
                         <!-- Meaning with pronunciation button -->
                         <div class="flex justify-between items-center mb-2">
-                            <p class="text-primary-600 hindi-font">{{ $words->meaning }}</p>
-                            <button onclick="playPronunciation2('{{ $words->meaning }}')"
+                            <p class="text-primary-600 hindi-font">{{ $words->hindi_script }}</p>
+                            <button onclick="playPronunciation2('{{ $words->hindi_script }}')"
                                 class="flex items-center justify-center w-8 h-8 text-primary-600 hover:text-primary-700
                    bg-primary-50 hover:bg-primary-100 transition-colors duration-200 rounded-full shadow-sm">
                                 <i class="fas fa-volume-up text-lg"></i>
                             </button>
                         </div>
 
-                        <!-- Pronunciation text -->
-                        <p class="light-text text-sm mb-4">{{ $words->pronunciation }}</p>
+                        <!-- Roman Transliteration -->
+                        <p class="light-text text-sm mb-4">{{ $words->hindi_meaning }}</p>
 
                         <!-- View details link -->
-                        <a href="{{ route('worddetail', $words->slug) }}"
+                        <a href="#"
                             class="text-primary-600 hover:text-primary-700 transition-colors duration-200 text-sm font-medium">
                             View Details <i class="fas fa-arrow-right ml-1"></i>
                         </a>

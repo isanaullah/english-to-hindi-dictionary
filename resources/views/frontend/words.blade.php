@@ -14,7 +14,7 @@
 
     <!-- Search and Filter Section -->
     <div class="glassmorphism p-6 mb-8">
-        <form method="GET" action="{{ route('words') }}" id="filterForm">
+        <form method="GET" action="{{ isset($letter) ? route('words.letter', ['letter' => $letter]) : route('words') }}" id="filterForm">
             <div class="flex flex-col md:flex-row gap-4 items-center">
                 <!-- Search Input -->
                 <div class="flex-1 relative">
@@ -26,19 +26,18 @@
 
 
                 <!-- Sort Options -->
-                <div class="relative">
+                {{-- <div class="relative">
                     <select name="sort" id="sortFilter"
                         class="px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
-                        onchange="this.form.submit()">
-                        <option value="alphabetical" {{ request('sort') == 'alphabetical' ? 'selected' : '' }}>A-Z
-                        </option>
-                        @foreach (range('A', 'Z') as $letter)
-                            <option value="{{ $letter }}" {{ request('sort') == $letter ? 'selected' : '' }}>
-                                {{ $letter }}
+                        onchange="window.location.href=this.value">
+                        <option value="{{ route('words') }}" {{ !isset($letter) ? 'selected' : '' }}>A-Z (All)</option>
+                        @foreach (range('A', 'Z') as $alpha)
+                            <option value="{{ route('words.letter', ['letter' => $alpha]) }}" {{ isset($letter) && $letter == $alpha ? 'selected' : '' }}>
+                                {{ $alpha }} @if($alphabetCounts[$alpha] > 0)({{ $alphabetCounts[$alpha] }})@endif
                             </option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
 
                 <!-- Filter Button -->
                 <button type="submit"
@@ -47,6 +46,46 @@
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- Browse by Alphabet -->
+    <div class="glassmorphism p-6 mb-8">
+        <h3 class="text-lg font-semibold dark-text mb-4 text-center">Browse by Alphabet</h3>
+        <div class="flex flex-wrap justify-center gap-2">
+            @foreach (range('A', 'Z') as $alpha)
+                <a href="{{ route('words.letter', ['letter' => $alpha]) }}"
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200
+                          {{ isset($letter) && $letter == $alpha
+                              ? 'bg-primary-500 text-white shadow-lg transform scale-105'
+                              : ($alphabetCounts[$alpha] > 0
+                                  ? 'bg-slate-100 text-slate-700 hover:bg-primary-100 hover:text-primary-700'
+                                  : 'bg-slate-50 text-slate-400 cursor-not-allowed') }}">
+                    {{ $alpha }}
+                    @if($alphabetCounts[$alpha] > 0)
+                        <span class="text-xs ml-1 opacity-70">({{ $alphabetCounts[$alpha] }})</span>
+                    @endif
+                </a>
+            @endforeach
+
+            <!-- Show All option -->
+            <a href="{{ route('words') }}"
+               class="px-4 py-2 rounded-lg font-medium transition-all duration-200
+                      {{ !isset($letter)
+                          ? 'bg-primary-500 text-white shadow-lg transform scale-105'
+                          : 'bg-slate-100 text-slate-700 hover:bg-primary-100 hover:text-primary-700' }}">
+                All
+                <span class="text-xs ml-1 opacity-70">({{ $totalCount }})</span>
+            </a>
+        </div>
+
+        @if(isset($letter))
+            <div class="mt-4 text-center">
+                <p class="text-sm text-slate-600">
+                    Showing words starting with <strong class="text-primary-600">{{ $letter }}</strong>
+                    ({{ $words->count() }} of {{ $alphabetCounts[$letter] }} words)
+                </p>
+            </div>
+        @endif
     </div>
 
     <!-- Statistics -->
@@ -65,12 +104,12 @@
     <div id="wordsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse ($words as $word)
             <div class="word-card glassmorphism p-6 rounded-lg hover:shadow-xl transition-all duration-300"
-                data-word="{{ strtolower($word->word) }}">
+                data-word="{{ strtolower($word->english_phrase) }}">
 
                 <!-- Audio Button -->
                 <div class="flex justify-end items-start mb-4">
                     <button class="text-slate-400 hover:text-primary-500 transition-colors"
-                        onclick="speakWord('{{ $word->word }}')">
+                        onclick="speakWord('{{ $word->english_phrase }}')">
                         <i class="fas fa-volume-up"></i>
                     </button>
                 </div>
@@ -79,22 +118,22 @@
                 <div class="mb-3">
                     <h3 class="text-xl font-bold text-slate-800 mb-1">
                         <p class="text-sm text-slate-500">English</p>
-                        <a href="{{ route('worddetail', $word->slug) }}" class="hover:underline">
-                            {{ $word->word }}
+                        <a href="{{ route('worddetail', ['english_phrase' => !empty($word->english_phrase) ? $word->english_phrase : 'admin']) }}" class="hover:underline">
+                            {{ $word->english_phrase }}
                         </a>
                     </h3>
                 </div>
 
                 <!-- Hindi Translation -->
                 <div class="mb-3">
-                    <p class="text-sm text-slate-500">Hindi</p>
-                    <h4 class="text-2xl font-bold hindi-font text-primary-600 mb-1">{{ $word->meaning }}</h4>
+                    <p class="text-sm text-slate-500">Hindi Translation</p>
+                    <h4 class="text-2xl font-bold hindi-font text-primary-600 mb-1">{{ $word->hindi_script }}</h4>
                 </div>
 
-                <!-- Transliteration -->
+                <!-- Roman Transliteration -->
                 <div class="mb-4">
-                    <p class="text-sm text-slate-500">Pronunciation</p>
-                    <p class="text-lg font-medium text-accent-600 mb-1">{{ $word->pronunciation }}</p>
+                    <p class="text-sm text-slate-500">Roman Transliteration</p>
+                    <p class="text-lg font-medium text-accent-600 mb-1">{{ $word->hindi_meaning }}</p>
                 </div>
 
                 <!-- Action Buttons -->

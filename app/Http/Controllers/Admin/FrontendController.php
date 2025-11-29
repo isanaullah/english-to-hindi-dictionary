@@ -11,6 +11,7 @@ use App\Models\Tag;
 use App\Models\WebSetting;
 use App\Models\User;
 use App\Models\Words;
+use App\Models\HindiDictionary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 //For Schema
@@ -73,54 +74,53 @@ class FrontendController extends Controller
 
 // use Illuminate\Support\Str;
 
-public function worddetail($slug)
+public function worddetail($english_phrase)
 {
-    // Find the word by slug first, fallback to word field for backward compatibility
-    $words = Words::where('slug', $slug)->first();
+    // Find the word by english_phrase field
+    $words = HindiDictionary::where('english_phrase', $english_phrase)->first();
 
     if (!$words) {
-        // Fallback: try to find by word field (for backward compatibility)
-        $decodedSlug = urldecode($slug);
-        $words = Words::where('word', $decodedSlug)
-            ->orWhereRaw('LOWER(word) = ?', [strtolower($decodedSlug)])
+        // Fallback: try to find by english_phrase field with decoded slug
+        $decodedSlug = urldecode($english_phrase);
+        $words = HindiDictionary::where('english_phrase', $decodedSlug)
             ->firstOrFail();
     }
 
     // Get homepage info
     $homePage = Page::where('slug', 'home')->first();
     $page = [
-        'page_name' => $words->word . ' Meaning in Hindi | ' . ($homePage ? $homePage->page_name : 'Dictionary')
+        'page_name' => $words->english_phrase . ' Meaning in Hindi | ' . ($homePage ? $homePage->page_name : 'Dictionary')
     ];
 
     // Web settings
     $setting = WebSetting::first();
 
     // Word length (excluding spaces)
-    $wordLength = strlen(str_replace(' ', '', $words->word));
+    $wordLength = strlen(str_replace(' ', '', $words->english_phrase));
 
     // Syllable count approximation
-    $syllables = preg_split('/[aeiouy]+/i', $words->word);
+    $syllables = preg_split('/[aeiouy]+/i', $words->english_phrase);
     $syllableCount = count(array_filter($syllables)) ?: 1;
 
     // Similar words (starting with same letters)
-    $similarWords = Words::where('word', 'LIKE', $words->word . '%')
-        ->where('slug', '!=', $words->slug)
+    $similarWords = HindiDictionary::where('english_phrase', 'LIKE', $words->english_phrase . '%')
+        ->where('english_phrase', '!=', $words->english_phrase)
         ->take(3)
         ->get();
 
     if ($similarWords->isEmpty()) {
-        $similarWords = Words::where('slug', '!=', $words->slug)
+        $similarWords = HindiDictionary::where('english_phrase', '!=', $words->english_phrase)
             ->latest()
             ->take(3)
             ->get();
     }
 
     // Word of the day
-    $total = Words::count();
+    $total = HindiDictionary::count();
     $wordOfTheDay = null;
     if ($total > 0) {
         $dayIndex = now()->dayOfYear % $total;
-        $wordOfTheDay = Words::skip($dayIndex)->first();
+        $wordOfTheDay = HindiDictionary::skip($dayIndex)->first();
     }
 
     return view("frontend.word-detail", compact(
@@ -143,48 +143,67 @@ public function worddetail($slug)
 | Words Listing
 |--------------------------------------------------------------------------
 */
-    public function words(Request $request)
-    {
-        $page = Page::where('slug', 'words')->firstOrFail();
-        $setting = WebSetting::first();
-        $query = Words::query();
+public function words(Request $request, $letter = null)
+{
+    $page = Page::where('slug', 'words')->firstOrFail();
+    $setting = WebSetting::first();
 
-        // Apply search filter
-        if ($request->filled('search')) {
-            $search = $request->get('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('word', 'LIKE', "%{$search}%")
-                    // ->orWhere('meaning', 'LIKE', "%{$search}%")
-                    ->orWhere('meaning', 'LIKE', "%{$search}%")
-                    ->orWhere('pronunciation', 'LIKE', "%{$search}%");
-            });
-        }
+    $query = HindiDictionary::query();
 
-        // Apply alphabet filter
-        if ($request->filled('starts_with')) {
-            $letter = $request->get('starts_with');
-            $query->where('word', 'LIKE', $letter . '%');
-        }
+    // Exclude rows where english_phrase is null or empty
+    $query->whereNotNull('english_phrase')
+          ->where('english_phrase', '!=', '');
 
-        // Apply sorting / filter by alphabet
-        $sort = $request->get('sort', 'alphabetical');
-
-        if ($sort === 'alphabetical') {
-            $query->orderBy('word', 'asc');
-        } elseif (strlen($sort) === 1 && ctype_alpha($sort)) {
-            // If a single alphabet is selected (A-Z)
-            $query->where('word', 'LIKE', $sort . '%')
-                ->orderBy('word', 'asc');
-        }
-
-        // Get paginated results
-        $words = $query->paginate(12)->appends($request->query());
-
-        // Get total count for statistics
-        $totalCount = Words::count();
-
-        return view("frontend.words", compact('page','setting','words', 'totalCount'));
+    // Handle letter parameter from URL
+    if ($letter) {
+        $query->where('english_phrase', 'LIKE', $letter . '%');
     }
+
+    // Apply search filter
+    if ($request->filled('search')) {
+        $search = $request->get('search');
+        $query->where(function ($q) use ($search) {
+            $q->where('english_phrase', 'LIKE', "%{$search}%")
+                ->orWhere('hindi_script', 'LIKE', "%{$search}%")
+                ->orWhere('hindi_meaning', 'LIKE', "%{$search}%");
+        });
+    }
+
+    // Apply alphabet filter from form
+    if ($request->filled('starts_with')) {
+        $letter = $request->get('starts_with');
+        $query->where('english_phrase', 'LIKE', $letter . '%');
+    }
+
+    // Apply sorting / filter by alphabet
+    $sort = $request->get('sort', 'alphabetical');
+
+    if ($sort === 'alphabetical') {
+        $query->orderBy('english_phrase', 'asc');
+    } elseif (strlen($sort) === 1 && ctype_alpha($sort)) {
+        $query->where('english_phrase', 'LIKE', $sort . '%')
+              ->orderBy('english_phrase', 'asc');
+    }
+
+    // Paginated results
+    $words = $query->paginate(12)->appends($request->query());
+
+    // Total count
+    $totalCount = HindiDictionary::count();
+
+    // Get alphabet counts for browsing
+    $alphabetCounts = [];
+    foreach (range('A', 'Z') as $alpha) {
+        $count = HindiDictionary::where('english_phrase', 'LIKE', $alpha . '%')
+                               ->whereNotNull('english_phrase')
+                               ->where('english_phrase', '!=', '')
+                               ->count();
+        $alphabetCounts[$alpha] = $count;
+    }
+
+    return view("frontend.words", compact('page','setting','words', 'totalCount', 'alphabetCounts', 'letter'));
+}
+
 
 
     /*
