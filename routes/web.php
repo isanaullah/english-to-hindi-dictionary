@@ -53,6 +53,7 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('/login1', 'login')->name('login1');
     // Route::post('/login', 'loginPost')->name('login');
     Route::get('/categorylist', 'categorylist')->name('categorieslist');
+    Route::get('/api/search-words', 'searchWords')->name('search-words');
 
     // Blog
     Route::get('/blog/{slug}', 'blogshow')->name('blogshow');

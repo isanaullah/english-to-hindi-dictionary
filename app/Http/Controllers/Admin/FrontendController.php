@@ -57,7 +57,10 @@ class FrontendController extends Controller
         }
         $totalCount = HindiDictionary::count();
 
-        return view("frontend.index", compact('setting', 'page', 'wordOfTheDay', 'popularWords', 'alphabetCounts', 'totalCount'));
+        // 🔹 Sample words for search suggestions
+        $sampleWords = HindiDictionary::inRandomOrder()->take(4)->get();
+
+        return view("frontend.index", compact('setting', 'page', 'wordOfTheDay', 'popularWords', 'alphabetCounts', 'totalCount', 'sampleWords'));
     }
 
 /*
@@ -71,6 +74,28 @@ class FrontendController extends Controller
         $setting = WebSetting::first();
         $faqs = Faqs::take(4)->get();
         return view("frontend.faqs", compact('page', 'setting', 'faqs'));
+    }
+
+/*
+|--------------------------------------------------------------------------
+| Search API
+|--------------------------------------------------------------------------
+*/
+    public function searchWords(Request $request)
+    {
+        $query = $request->input('q');
+
+        if (!$query || strlen($query) < 1) {
+            return response()->json([]);
+        }
+
+        $results = HindiDictionary::whereRaw('LOWER(english_phrase) LIKE ?', [strtolower($query) . '%'])
+            ->orWhereRaw('LOWER(english_phrase) LIKE ?', ['%' . strtolower($query) . '%'])
+            ->select('english_phrase', 'hindi_script', 'hindi_meaning')
+            ->limit(8)
+            ->get();
+
+        return response()->json($results);
     }
 /*
 |--------------------------------------------------------------------------

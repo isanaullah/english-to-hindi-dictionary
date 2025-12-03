@@ -13,15 +13,14 @@
 
         <div class="flex mb-6 rounded-xl overflow-hidden shadow-md">
             <div class="language-tab active py-3 px-6 bg-white font-semibold">English to Hindi</div>
-            <div class="language-tab py-3 px-6 bg-slate-100 font-semibold">Hindi to English</div>
         </div>
 
-        <div class="relative w-full max-w-2xl mb-12">
-            <form action="{{ route('words') }}" method="GET" class="w-full">
+        <div class="relative w-full max-w-2xl mb-12" style="overflow: visible;">
+            <form action="{{ route('words') }}" method="GET" class="w-full" id="searchForm">
                 <div class="flex">
-                    <input type="text" name="search" placeholder="Search for any English word..."
+                    <input type="text" name="search" id="searchInput" placeholder="Search for any English word..."
                         class="w-full px-6 py-4 rounded-l-2xl shadow-md focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 search-input border border-r-0 border-slate-200"
-                        value="{{ request('search', '') }}">
+                        value="{{ request('search', '') }}" autocomplete="off">
                     <button type="submit"
                         class="bg-primary-500 text-white px-6 py-4 rounded-r-2xl font-semibold hover:bg-primary-600 transition-all duration-300 flex items-center">
                         <i class="fas fa-search mr-2"></i>Search
@@ -29,42 +28,68 @@
                 </div>
             </form>
 
-            <div
-                class="search-suggestions absolute w-full mt-2 bg-white rounded-xl shadow-xl overflow-hidden z-10 border border-slate-200">
-                <div class="p-3 hover:bg-slate-50 cursor-pointer transition-all duration-200 flex justify-between">
-                    <div>
-                        <span class="font-semibold dark-text">Hello</span> - <span class="hindi-font">नमस्ते</span>
-                    </div>
-                    <div class="text-primary-600">
-                        <i class="fas fa-volume-up"></i>
-                    </div>
-                </div>
-                <div class="p-3 hover:bg-slate-50 cursor-pointer transition-all duration-200 flex justify-between">
-                    <div>
-                        <span class="font-semibold dark-text">Beautiful</span> - <span class="hindi-font">सुंदर</span>
-                    </div>
-                    <div class="text-primary-600">
-                        <i class="fas fa-volume-up"></i>
-                    </div>
-                </div>
-                <div class="p-3 hover:bg-slate-50 cursor-pointer transition-all duration-200 flex justify-between">
-                    <div>
-                        <span class="font-semibold dark-text">Thank you</span> - <span class="hindi-font">धन्यवाद</span>
-                    </div>
-                    <div class="text-primary-600">
-                        <i class="fas fa-volume-up"></i>
-                    </div>
-                </div>
-                <div class="p-3 hover:bg-slate-50 cursor-pointer transition-all duration-200 flex justify-between">
-                    <div>
-                        <span class="font-semibold dark-text">Water</span> - <span class="hindi-font">पानी</span>
-                    </div>
-                    <div class="text-primary-600">
-                        <i class="fas fa-volume-up"></i>
-                    </div>
-                </div>
+            <div id="searchSuggestions"
+                class="search-suggestions absolute left-0 w-full top-full mt-2 bg-white rounded-xl shadow-2xl overflow-y-auto z-50 border border-slate-200 hidden max-h-96">
             </div>
         </div>
+
+        <script>
+            const searchInput = document.getElementById('searchInput');
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length < 1) {
+                    suggestionsContainer.classList.add('hidden');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetch(`{{ route('search-words') }}?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.length === 0) {
+                                suggestionsContainer.innerHTML = '<div class="p-4 text-slate-500 text-center text-sm">No words found</div>';
+                                suggestionsContainer.classList.remove('hidden');
+                                return;
+                            }
+
+                            suggestionsContainer.innerHTML = data.map((word, index) => `
+                                <a href="/word/${encodeURIComponent(word.english_phrase)}"
+                                   class="px-4 py-3 hover:bg-primary-50 transition-colors duration-150 flex justify-between items-center block ${index !== data.length - 1 ? 'border-b border-slate-100' : ''}">
+                                    <div class="flex-1">
+                                        <span class="font-semibold text-slate-800">${word.english_phrase}</span>
+                                        <span class="text-slate-400 mx-2">-</span>
+                                        <span class="hindi-font text-primary-600">${word.hindi_script}</span>
+                                    </div>
+                                    <div class="text-primary-500 ml-3 flex-shrink-0">
+                                        <i class="fas fa-volume-up text-sm"></i>
+                                    </div>
+                                </a>
+                            `).join('');
+                            suggestionsContainer.classList.remove('hidden');
+                        })
+                        .catch(error => console.error('Search error:', error));
+                }, 300);
+            });
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.relative')) {
+                    suggestionsContainer.classList.add('hidden');
+                }
+            });
+
+            // Show suggestions on focus if there's a query
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length > 0 && !suggestionsContainer.classList.contains('hidden')) {
+                    suggestionsContainer.classList.remove('hidden');
+                }
+            });
+        </script>
 
         <div class="flex flex-wrap justify-center gap-4">
             <div class="px-4 py-2 glassmorphism rounded-full dark-text flex items-center shadow-sm">
