@@ -108,8 +108,8 @@
 
                 <!-- Audio Button -->
                 <div class="flex justify-end items-start mb-4">
-                    <button class="text-slate-400 hover:text-primary-500 transition-colors"
-                        onclick="speakWord('{{ $word->english_phrase }}')">
+                    <button class="text-slate-400 hover:text-primary-500 transition-colors volume-btn"
+                        data-word="{{ $word->english_phrase }}">
                         <i class="fas fa-volume-up"></i>
                     </button>
                 </div>
@@ -219,8 +219,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-        const categoryFilter = document.getElementById('categoryFilter');
-        const sortFilter = document.getElementById('sortFilter');
         const filterForm = document.getElementById('filterForm');
 
         let searchTimeout;
@@ -233,20 +231,66 @@
             }, 500); // Wait 500ms after user stops typing
         });
 
-
-        sortFilter.addEventListener('change', function() {
-            filterForm.submit();
-        });
-
-        // Text-to-speech function
+        // Enhanced text-to-speech function for English
         window.speakWord = function(word) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.8;
-                speechSynthesis.speak(utterance);
+            console.log('speakWord called with:', word);
+
+            if (!word || word.trim() === '') {
+                console.log('Word not found!');
+                return;
             }
+
+            if (!('speechSynthesis' in window)) {
+                console.log('Speech synthesis not supported in this browser');
+                return;
+            }
+
+            console.log('Starting speech synthesis for:', word);
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(word);
+
+            utterance.rate = 0.9;
+            utterance.pitch = 0;
+            utterance.volume = 1;
+
+            const loadVoices = () => {
+                const voices = window.speechSynthesis.getVoices();
+                console.log('Available voices:', voices.length);
+                const preferredVoice = voices.find(v => v.lang.startsWith('en'));
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                    console.log('Using voice:', preferredVoice.name);
+                }
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (window.speechSynthesis.getVoices().length === 0) {
+                console.log('Loading voices...');
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            } else {
+                loadVoices();
+            }
+
+            utterance.onstart = () => console.log('🔊 Playing:', word);
+            utterance.onend = () => console.log('✅ Finished');
+            utterance.onerror = (event) => console.error('Speech error:', event);
         };
+
+        // Audio pronunciation buttons with visual feedback
+        const volumeButtons = document.querySelectorAll('.volume-btn');
+        volumeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const word = this.getAttribute('data-word');
+                speakWord(word);
+
+                // Visual feedback
+                const icon = this.querySelector('i');
+                icon.classList.add('text-accent-600');
+                setTimeout(() => {
+                    icon.classList.remove('text-accent-600');
+                }, 1000);
+            });
+        });
 
         // Add animation on scroll
         const observerOptions = {
