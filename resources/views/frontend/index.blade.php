@@ -102,11 +102,11 @@
                             <h3 class="text-2xl font-bold dark-text"><a
                                     href="">{{ $wordOfTheDay->english_phrase }}</a>
                             </h3>
-                            @if ($wordOfTheDay->part_of_speech)
+                            {{--@if ($wordOfTheDay->hindi_meaning)
                                 <span class="ml-3 text-accent-600 bg-accent-100 px-2 py-1 rounded text-sm">
-                                    {{ $wordOfTheDay->part_of_speech }}
+                                    {{ $wordOfTheDay->hindi_meaning }}
                                 </span>
-                            @endif
+                            @endif--}}
                         </div>
                         @if ($wordOfTheDay->hindi_script)
                             <p class="hindi-font text-primary-600 text-xl mt-1">
@@ -126,14 +126,14 @@
                 </div>
 
                 <div class="my-4">
-                    @if ($wordOfTheDay->definition)
-                        <p class="dark-text"><span class="font-semibold">Meaning:</span> {{ $wordOfTheDay->definition }}
+                    @if ($wordOfTheDay->english_definition)
+                        <p class="dark-text"><span class="font-semibold">Meaning:</span> {{ $wordOfTheDay->english_definition }}
                         </p>
                     @endif
 
-                    @if ($wordOfTheDay->example)
-                        <p class="dark-text mt-2"><span class="font-semibold">Example:</span>
-                            {{ $wordOfTheDay->example }}</p>
+                    @if ($wordOfTheDay->hindi_meaning)
+                        <p class="dark-text mt-2"><span class="font-semibold">Roman English:</span>
+                            {{ $wordOfTheDay->hindi_meaning }}</p>
                     @endif
 
                     @if ($wordOfTheDay->synonyms)
@@ -264,11 +264,11 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-xl font-bold dark-text">
-                                <a href="{{ route('worddetail', $word->slug) }}">{{ $word->word }}</a>
+                                <a href="{{ route('worddetail', $word->slug) }}">{{ $word->english_phrase }}</a>
                             </h3>
-                            <p class="hindi-font text-primary-600 text-lg">{{ $word->translation ?? '' }}</p>
+                            <p class="hindi-font text-primary-600 text-lg">{{ $word->hindi_script ?? '' }}</p>
                         </div>
-                        <button onclick="playPronunciation('{{ $word->word }}')"
+                        <button onclick="playPronunciation('{{ $word->english_phrase }}')"
                             class="text-primary-600 hover:text-primary-700 transition-colors duration-200 p-2 rounded-lg hover:bg-primary-50">
                             <i class="fas fa-volume-up text-2xl"></i>
                         </button>
