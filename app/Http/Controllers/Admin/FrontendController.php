@@ -40,10 +40,10 @@ class FrontendController extends Controller
         $wordOfTheDay = null;
         if ($total > 0) {
             $dayIndex = now()->dayOfYear % $total;
-            $wordOfTheDay = Words::skip($dayIndex)->first();
+            $wordOfTheDay = HindiDictionary::skip($dayIndex)->first();
         }
         $popularWords = Cache::remember('popular_words', 1440, function () {
-            return Words::inRandomOrder()->take(4)->get();
+            return HindiDictionary::inRandomOrder()->take(4)->get();
         });
         // Cache::forget('popular_words');
         // $popularWords = Cache::remember('popular_words', now()->addSeconds(20), function () {

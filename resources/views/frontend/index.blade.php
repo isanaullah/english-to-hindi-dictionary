@@ -100,7 +100,7 @@
                     <div>
                         <div class="flex items-center">
                             <h3 class="text-2xl font-bold dark-text"><a
-                                    href="{{ route('worddetail', $wordOfTheDay->slug) }}">{{ $wordOfTheDay->word }}</a>
+                                    href="">{{ $wordOfTheDay->english_phrase }}</a>
                             </h3>
                             @if ($wordOfTheDay->part_of_speech)
                                 <span class="ml-3 text-accent-600 bg-accent-100 px-2 py-1 rounded text-sm">
@@ -108,15 +108,15 @@
                                 </span>
                             @endif
                         </div>
-                        @if ($wordOfTheDay->meaning)
+                        @if ($wordOfTheDay->hindi_script)
                             <p class="hindi-font text-primary-600 text-xl mt-1">
-                                {{ $wordOfTheDay->meaning }}
+                                {{ $wordOfTheDay->hindi_script }}
                             </p>
                         @endif
                     </div>
                     <div class="flex space-x-2">
                         <!-- Your button -->
-                         <button onclick="playPronunciation('{{ $wordOfTheDay->word }}')"
+                         <button onclick="playPronunciation('{{ $wordOfTheDay->english_phrase }}')"
                             class="text-primary-600 hover:text-primary-700 transition-colors duration-200 p-2 rounded-lg hover:bg-primary-50">
                             <i class="fas fa-volume-up text-2xl"></i>
                         </button>
@@ -313,7 +313,7 @@
                             }
                         </script>
                     </div>
-                    <p class="dark-text mt-3 text-sm">{{ $word->meaning ?? 'No description available.' }}</p>
+                    <p class="dark-text mt-3 text-sm">{{ $word->hindi_script ?? 'No description available.' }}</p>
                     <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
                         <span class="text-slate-600 text-sm">
                             <i class="fas fa-fire text-accent-500"></i> Popular
