@@ -164,86 +164,45 @@
 
     <!-- Browse Words by Alphabet -->
     <section class="my-16">
-        <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold dark-text mb-4 section-title">Browse Words by Alphabet</h2>
-            <p class="light-text text-lg">Find Words starting with your favorite letters</p>
-        </div>
+        <div class="glassmorphism p-8 mb-8 w-full">
+            <h3 class="text-2xl font-semibold dark-text mb-6 text-center">Browse by Alphabet</h3>
+            <div class="flex flex-wrap justify-center gap-3">
+                @foreach (range('A', 'Z') as $alpha)
+                    <a href="{{ route('words.letter', ['letter' => $alpha]) }}"
+                       class="px-4 py-2 rounded-lg font-medium transition-all duration-200
+                              {{ isset($letter) && $letter == $alpha
+                                  ? 'bg-primary-500 text-white shadow-lg transform scale-105'
+                                  : ($alphabetCounts[$alpha] > 0
+                                      ? 'bg-slate-100 text-slate-700 hover:bg-primary-100 hover:text-primary-700'
+                                      : 'bg-slate-50 text-slate-400 cursor-not-allowed') }}">
+                        {{ $alpha }}
+                        @if($alphabetCounts[$alpha] > 0)
+                            <span class="text-xs ml-1 opacity-70">({{ $alphabetCounts[$alpha] }})</span>
+                        @endif
+                    </a>
+                @endforeach
 
-        <div class="glassmorphism p-8 rounded-2xl shadow-md max-w-4xl mx-auto">
-            <div class="grid grid-cols-6 md:grid-cols-9 lg:grid-cols-13 gap-3 mb-8">
-                <!-- First Row: A-M -->
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">A</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">B</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">C</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">D</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">E</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">F</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">G</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">H</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">I</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">J</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">K</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">L</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">M</button>
+                <!-- Show All option -->
+                <a href="{{ route('words') }}"
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-200
+                          {{ !isset($letter)
+                              ? 'bg-primary-500 text-white shadow-lg transform scale-105'
+                              : 'bg-slate-100 text-slate-700 hover:bg-primary-100 hover:text-primary-700' }}">
+                    All
+                    <span class="text-xs ml-1 opacity-70">({{ $totalCount }})</span>
+                </a>
             </div>
 
-            <div class="grid grid-cols-6 md:grid-cols-9 lg:grid-cols-13 gap-3">
-                <!-- Second Row: N-Z -->
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">N</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">O</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">P</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">Q</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">R</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">S</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">T</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">U</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">V</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">W</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">X</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">Y</button>
-                <button
-                    class="alphabet-btn aspect-square rounded-lg bg-white text-slate-700 font-bold text-lg hover:bg-primary-50 hover:text-primary-600 transition-all duration-300 transform hover:scale-110 border border-slate-200 shadow-sm">Z</button>
-            </div>
+            @if(isset($letter))
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-slate-600">
+                        Showing words starting with <strong class="text-primary-600">{{ $letter }}</strong>
+                        ({{ $words->count() }} of {{ $alphabetCounts[$letter] }} words)
+                    </p>
+                </div>
+            @endif
         </div>
     </section>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle alphabet button clicks
-            document.querySelectorAll('.alphabet-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const letter = this.textContent.trim().toLowerCase();
-                    // Redirect to words page with the letter filter
-                    window.location.href = "{{ route('words') }}?starts_with=" + letter;
-                });
-            });
-        });
-    </script>
 
     <!-- Alphabet Filter -->
 
@@ -264,7 +223,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <h3 class="text-xl font-bold dark-text">
-                                <a href="{{ route('worddetail', $word->slug) }}">{{ $word->english_phrase }}</a>
+                                <a href="">{{ $word->english_phrase }}</a>
                             </h3>
                             <p class="hindi-font text-primary-600 text-lg">{{ $word->hindi_script ?? '' }}</p>
                         </div>
@@ -313,7 +272,7 @@
                             }
                         </script>
                     </div>
-                    <p class="dark-text mt-3 text-sm">{{ $word->hindi_script ?? 'No description available.' }}</p>
+                    <p class="dark-text mt-3 text-sm">{{ $word->english_definition ?? 'No description available.' }}</p>
                     <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
                         <span class="text-slate-600 text-sm">
                             <i class="fas fa-fire text-accent-500"></i> Popular

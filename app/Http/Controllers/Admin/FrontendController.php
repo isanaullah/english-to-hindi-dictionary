@@ -50,7 +50,14 @@ class FrontendController extends Controller
         //     return Words::inRandomOrder()->take(4)->get();
         // });
 
-        return view("frontend.index", compact('setting', 'page', 'wordOfTheDay', 'popularWords'));
+        // 🔹 Alphabet counts for browse section
+        $alphabetCounts = [];
+        foreach (range('A', 'Z') as $letter) {
+            $alphabetCounts[$letter] = HindiDictionary::where('english_phrase', 'LIKE', $letter . '%')->count();
+        }
+        $totalCount = HindiDictionary::count();
+
+        return view("frontend.index", compact('setting', 'page', 'wordOfTheDay', 'popularWords', 'alphabetCounts', 'totalCount'));
     }
 
 /*
