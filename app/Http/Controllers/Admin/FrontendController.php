@@ -261,7 +261,13 @@ public function words(Request $request, $letter = null)
         $page       = Page::where('slug', 'blog-listing')->first();
         $setting    = WebSetting::first();
         $site_name  = config('seotools.opengraph.defaults.site_name', config('app.name'));
+        $total = Words::count();
 
+        $wordOfTheDay = null;
+        if ($total > 0) {
+            $dayIndex = now()->dayOfYear % $total;
+            $wordOfTheDay = HindiDictionary::skip($dayIndex)->first();
+        }
         // Start building the query
         $query = BlogArticle::where('status', 1)
             ->whereHas('category', function ($q) {
@@ -409,6 +415,7 @@ public function words(Request $request, $letter = null)
             'recentposts',
             'tags',
             'schemaMarkup',
+            'wordOfTheDay',
             'breadcrumbsMarkup'
         ));
     }

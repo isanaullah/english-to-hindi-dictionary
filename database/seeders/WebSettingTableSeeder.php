@@ -34,6 +34,7 @@ class WebSettingTableSeeder extends Seeder
           'site_logo' => 'logo.png',
           'site_fav' => 'sitefav.png',
           'site_author' => 'Admin',
+          'site_author_desc' => 'AdminAdminAdminAdminAdmin',
           'theme_footer' => 'Copyright © 2024 All Reserved by',
       ]);
   }

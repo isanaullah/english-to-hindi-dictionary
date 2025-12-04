@@ -24,13 +24,13 @@
         <!-- Categories Filter -->
         <section class="my-12">
             <div class="flex flex-wrap justify-center gap-4">
-                <button class="category-filter active px-6 py-2 glassmorphism rounded-full dark-text font-medium hover:bg-primary-50 transition-all duration-300 shadow-sm">
+                <a href="{{ route('bloglist') }}" class="category-filter px-6 py-2 glassmorphism rounded-full dark-text font-medium hover:bg-primary-50 transition-all duration-300 shadow-sm {{ !request('categorySlug') ? 'active bg-primary-100 text-primary-600' : '' }}">
                     All Posts
-                </button>
+                </a>
                 @foreach ($categories as $category)
-                <button class="category-filter px-6 py-2 glassmorphism rounded-full dark-text font-medium hover:bg-primary-50 transition-all duration-300 shadow-sm">
+                <a href="{{ route('bloglist.category', $category->slug) }}" class="category-filter px-6 py-2 glassmorphism rounded-full dark-text font-medium hover:bg-primary-50 transition-all duration-300 shadow-sm {{ request('categorySlug') == $category->slug ? 'active bg-primary-100 text-primary-600' : '' }}">
                     {{$category->title}}
-                </button>
+                </a>
                 @endforeach
             </div>
         </section>
@@ -63,9 +63,9 @@
                     </div>
                     <div class="glassmorphism p-6 rounded-xl">
                         <div class="text-center">
-                            <span class="hindi-font text-4xl text-primary-600 block mb-4">नमस्ते</span>
-                            <p class="dark-text font-medium mb-2">Namaste</p>
-                            <p class="light-text text-sm">The most important greeting you'll ever learn</p>
+                            <span class="hindi-font text-4xl text-primary-600 block mb-4">{{$wordOfTheDay->hindi_script}}</span>
+                            <p class="dark-text font-medium mb-2">{{$wordOfTheDay->english_phrase}}</p>
+                            <p class="light-text text-sm">{{$wordOfTheDay->english_definition}}</p>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,33 @@
 
             @if($blogs->count() > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach ($blogs as $bc)
+                @foreach ($blogs as $index => $bc)
+                @if($index == 3)
+                    <!-- Ad After 3rd Post -->
+                    <div class="col-span-full">
+                        @php
+                            $ad = \App\Models\HomeAd::getActiveAdsByPosition('blog_after_3rd')->first();
+                        @endphp
+                        @if($ad)
+                            <div class="my-8">
+                                {!! $ad->ad_code !!}
+                            </div>
+                        @endif
+                    </div>
+                @endif
+                @if($index == 6)
+                    <!-- Ad After 7th Post -->
+                    <div class="col-span-full">
+                        @php
+                            $ad = \App\Models\HomeAd::getActiveAdsByPosition('blog_after_7th')->first();
+                        @endphp
+                        @if($ad)
+                            <div class="my-8">
+                                {!! $ad->ad_code !!}
+                            </div>
+                        @endif
+                    </div>
+                @endif
                 <article class="glassmorphism p-6 rounded-2xl shadow-md word-card">
                     <div class="flex items-center mb-4">
                         <span class="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium"><a href="{{ route('bloglist.category', $bc->category->slug) }}">{{$bc->category->title}}</span></a>
@@ -160,6 +186,18 @@
             @endif
         </section>
 
+        <!-- Ad Before Pagination -->
+        @php
+            $ad = \App\Models\HomeAd::getActiveAdsByPosition('blog_before_pagination')->first();
+        @endphp
+        @if($ad)
+        <section class="my-16">
+            <div class="max-w-4xl mx-auto">
+                {!! $ad->ad_code !!}
+            </div>
+        </section>
+        @endif
+
         <!-- Pagination -->
         @if($blogs->hasPages())
         <section class="my-16">
@@ -187,16 +225,4 @@
         </section>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Category filter functionality
-            const categoryFilters = document.querySelectorAll('.category-filter');
-            categoryFilters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    categoryFilters.forEach(f => f.classList.remove('active', 'bg-primary-100', 'text-primary-600'));
-                    this.classList.add('active', 'bg-primary-100', 'text-primary-600');
-                });
-            });
-        });
-    </script>
 @include('frontend.partials.footer')
